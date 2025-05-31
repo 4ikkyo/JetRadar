@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editGroupInput = document.getElementById('editGroupInput');
     const saveAliasGroupButton = document.getElementById('saveAliasGroupButton');
 
-    const API_BASE_URL = 'http://127.0.0.1:8000';
+    const API_BASE_URL = "https://41dc-2a02-3035-a60-557f-8ee9-b277-1c19-2610.ngrok-free.app";
     let currentTelegramUserId = null;
 
     tg.ready();
