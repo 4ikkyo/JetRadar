@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editGroupInput = document.getElementById('editGroupInput');
     const saveAliasGroupButton = document.getElementById('saveAliasGroupButton');
 
-    const API_BASE_URL = "https://41dc-2a02-3035-a60-557f-8ee9-b277-1c19-2610.ngrok-free.app";
+    const API_BASE_URL = "https://cb95-2a02-3035-a60-557f-8ee9-b277-1c19-2610.ngrok-free.app";
     let currentTelegramUserId = null;
 
     tg.ready();
@@ -114,83 +114,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function showWalletDetails(address, alias) {
-        addWalletSection.style.display = 'none';
-        watchlistSection.style.display = 'none';
-        walletDetailsSection.style.display = 'block';
-        walletDetailsSection.classList.remove('hidden');
-        walletDetailsSection.classList.add('visible');
+    addWalletSection.style.display = 'none';
+    watchlistSection.style.display = 'none';
+    walletDetailsSection.style.display = 'block';
 
-        detailsAddressSpan.textContent = address;
-        summaryAliasSpan.textContent = alias || 'Без метки';
-        editAliasInput.value = alias || '';
-        editGroupInput.value = '';
+    detailsAddressSpan.textContent = address;
+    summaryAliasSpan.textContent = alias || 'Без метки';
+    summaryBalanceSpan.textContent = '-';
+    summaryTxCountSpan.textContent = '-';
+    summaryActivitySpan.textContent = '-';
+    transactionHistoryUl.innerHTML = '<li>Загрузка истории...</li>';
 
-        summaryBalanceSpan.textContent = summaryTxCountSpan.textContent = summaryActivitySpan.textContent = 'Загрузка...';
-        transactionHistoryUl.innerHTML = '<li>Загрузка истории...</li>';
-        graphDataOutputPre.textContent = 'Загрузка графа...';
+    const history = await fetchAPI(`/wallet/${address}/history`);
+    transactionHistoryUl.innerHTML = '';
 
-        const visContainer = document.getElementById('visGraphContainer');
-        visContainer.innerHTML = ''; // очистка предыдущего графа
-
-        if (graphData && graphData.nodes && graphData.edges) {
-            const network = new vis.Network(visContainer, {
-                nodes: graphData.nodes.map(n => ({
-                    id: n.id,
-                    label: n.label || n.id,
-                    shape: 'dot',
-                    size: 10,
-                    color: {
-                        background: '#007bff',
-                        border: '#0056b3'
-                    },
-                    font: { size: 14 }
-                })),
-                edges: graphData.edges.map(e => ({
-                    from: e.from,
-                    to: e.to,
-                    arrows: 'to',
-                    color: { color: '#999' }
-                }))
-            }, {
-                physics: { enabled: true },
-                layout: { improvedLayout: true },
-                nodes: { shadow: true },
-                edges: { smooth: true }
-            });
-
-            network.on("click", function (params) {
-                if (params.nodes.length) {
-                    const clickedNodeId = params.nodes[0];
-                    tg.showAlert(`Клик по узлу: ${clickedNodeId}`);
-                }
-            });
-        } else {
-            visContainer.innerHTML = '<p style="padding: 10px;">Нет данных для визуализации.</p>';
-        }
-
-        const summary = await fetchAPI(`/wallet/${address}/summary`);
-        if (summary) {
-            summaryBalanceSpan.textContent = `${summary.balance_ton || '0'} TON, ${summary.balance_jetton || '0'} Jetton`;
-            summaryTxCountSpan.textContent = summary.transaction_count || '0';
-            summaryActivitySpan.textContent = summary.last_activity_time || '-';
-        }
-
-        const history = await fetchAPI(`/wallet/${address}/history`);
-        transactionHistoryUl.innerHTML = '';
-        if (history?.transactions?.length) {
-            txLimitSpan.textContent = history.transactions.length;
-            history.transactions.forEach(tx => {
-                const li = document.createElement('li');
-                li.innerHTML = `<strong>${tx.token_type}</strong> ${tx.amount} → ${tx.counterparty}`;
-                transactionHistoryUl.appendChild(li);
-            });
-        } else {
-            transactionHistoryUl.innerHTML = '<li>Нет транзакций</li>';
-        }
-
-        const graphData = await fetchAPI('/graph', 'GET', { for_address: address });
-        graphDataOutputPre.textContent = graphData ? JSON.stringify(graphData, null, 2) : 'Ошибка загрузки графа';
+    if (history?.transactions?.length) {
+        txLimitSpan.textContent = history.transactions.length;
+        history.transactions.forEach(tx => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${tx.token_type}</strong> ${tx.amount} → ${tx.counterparty}`;
+            transactionHistoryUl.appendChild(li);
+        });
+    } else {
+        transactionHistoryUl.innerHTML = '<li>Нет транзакций</li>';
     }
+}
+
 
     async function saveAliasAndGroup() {
         const newAlias = editAliasInput.value.trim();

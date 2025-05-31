@@ -171,7 +171,7 @@ async def send_webapp_button(message: Message):
         [
             InlineKeyboardButton(
                 text="🚀 Відкрити JetRadar WebApp",
-                web_app=WebAppInfo(url="https://f3f9-2a02-3035-a60-557f-8ee9-b277-1c19-2610.ngrok-free.app")
+                web_app=WebAppInfo(url="https://4ikkyo.github.io/JetRadar/")
             )
         ]
     ])
