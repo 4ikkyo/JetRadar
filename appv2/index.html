@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JetRadar Mini App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JetRadar</h1>
+            <p id="userInfo">Загрузка данных пользователя...</p>
+        </header>
+
+        <section id="addWalletSection">
+            <h2>Добавить кошелек в Watchlist</h2>
+            <input type="text" id="walletAddress" placeholder="Адрес TON/Jetton кошелька">
+            <input type="text" id="walletAlias" placeholder="Метка (например, 'Мой основной')">
+            <button id="addWalletButton">Добавить</button>
+        </section>
+
+        <section id="watchlistSection">
+            <h2>Мой Watchlist</h2>
+            <button id="refreshWatchlistButton">Обновить список</button>
+            <ul id="walletList">
+                </ul>
+        </section>
+
+        <section id="walletDetailsSection" style="display:none;">
+            <h2>Детали кошелька <span id="detailsAddress"></span></h2>
+            <button id="backToWatchlistButton">Назад к списку</button>
+            <div id="walletSummary">
+                <p><strong>Метка:</strong> <span id="summaryAlias">-</span></p>
+                <p><strong>Баланс:</strong> <span id="summaryBalance">-</span></p>
+                <p><strong>Кол-во транзакций:</strong> <span id="summaryTxCount">-</span></p>
+                <p><strong>Активность:</strong> <span id="summaryActivity">-</span></p>
+            </div>
+            <h3>Редактировать</h3>
+            <div id="editAliasGroupForm">
+                <input type="text" id="editAliasInput" placeholder="Новая метка (alias)">
+                <input type="text" id="editGroupInput" placeholder="Новая группа (опционально)">
+                <button id="saveAliasGroupButton">💾 Сохранить</button>
+            </div>
+            <h3>История транзакций (последние <span id="txLimit"></span>)</h3>
+            <ul id="transactionHistory">
+                </ul>
+            <h3>Визуализация графа</h3>
+            <div id="visGraphContainer" style="height: 400px; background: #fff; border-radius: 8px; margin-top: 10px;"></div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
