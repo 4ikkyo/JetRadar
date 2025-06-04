@@ -1,20 +1,58 @@
 from fastapi import FastAPI
-from .routes.wallets import router as wallets_router
 from fastapi.middleware.cors import CORSMiddleware
+
+# Убедитесь, что пути импорта корректны
+from contextlib import asynccontextmanager
+from .routes.wallets import router as wallets_router # Убедитесь, что путь правильный
+from db.db_init import init_db
+from .scheduler import init_scheduler, shutdown_scheduler # <--- Импорт функций планировщика
+import os # для доступа к TONAPI_KEY
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("INFO:     API Запуск - Инициализация базы данных...")
+    await init_db()
+    print("INFO:     API Запуск - Инициализация базы данных завершена.")
+
+    if os.getenv("TONAPI_KEY"):  # Запускаем планировщик только если есть ключ API
+        print("INFO:     API Запуск - Инициализация планировщика...")
+        if init_scheduler():
+            print("INFO:     API Запуск - Планировщик успешно инициализирован.")
+        else:
+            print(
+                "WARN:     API Запуск - Планировщик не был запущен (возможно, из-за ошибки или отсутствия TONAPI_KEY).")
+    else:
+        print("WARN:     API Запуск - TONAPI_KEY не найден, планировщик не будет запущен.")
+
+    yield  # <--- Основная часть работы приложения FastAPI
+
+    print("INFO:     API Завершение работы - Остановка планировщика...")
+    shutdown_scheduler()
+    print("INFO:     API Завершение работы - Планировщик остановлен.")
+
 
 app = FastAPI(
     title="JetRadar API",
-    description="API для JetRadar (отримання історії гаманців тощо)",
-    version="0.1.0",
+    description="API для JetRadar (отримання історії кошельків, управління Watchlist і т.д.)",
+    version="0.2.1",
+    lifespan=lifespan
 )
+# Если вы используете более старую версию FastAPI или предпочитаете on_event:
+# @app.on_event("startup")
+# async def on_startup():
+#     print("INFO:     API Запуск - Инициализация базы данных...")
+#     await init_db()
+#     print("INFO:     API Запуск - Инициализация базы данных завершена.")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # или ограничь на нужный домен
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
-# Оце ЄДИНЕ ПРАВИЛЬНЕ включення:
-app.include_router(wallets_router, prefix="/wallet", tags=["Wallet"])
+app.include_router(wallets_router, prefix="/wallet", tags=["Wallet Operations"])
+
+@app.get("/", tags=["Root"], summary="Корневой эндпоинт для проверки работы API")
+async def read_root():
+    return {"message": "Welcome to JetRadar API"}

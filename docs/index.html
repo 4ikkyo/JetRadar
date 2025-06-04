@@ -1,58 +1,239 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JetRadar Mini App</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="app_title">JetRadar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #00bfff;
+      --background: #ffffff;
+      --secondary-bg: #f7f9fc;
+      --text-color: #1c1c1e;
+      --border-color: #dfe3e8;
+    }
+
+    [data-theme="dark"] {
+      --background: #121212;
+      --secondary-bg: #1e1e1e;
+      --text-color: #ffffff;
+      --border-color: #2c2c2c;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Manrope', sans-serif;
+      background-color: var(--background);
+      color: var(--text-color);
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: var(--primary-color);
+    }
+
+    .lang-select {
+      margin-top: 0.5rem;
+    }
+
+    input[type="text"], button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      font-size: 1rem;
+      background-color: var(--secondary-bg);
+      color: var(--text-color);
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      border: none;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    section {
+      background: var(--secondary-bg);
+      padding: 1rem;
+      border-radius: 16px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #fff;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    li:hover {
+      background: #eaf8ff;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    #visGraphContainer {
+      height: 400px;
+      background: #fff;
+      border-radius: 8px;
+    }
+
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>JetRadar</h1>
-            <p id="userInfo">Загрузка данных пользователя...</p>
-        </header>
+  <div class="container">
+    <!-- Заголовок и состояние пользователя -->
+    <h1 data-i18n="app_title">JetRadar</h1>
+    <p id="userInfo">Загрузка пользователя...</p>
 
-        <section id="addWalletSection">
-            <h2>Добавить кошелек в Watchlist</h2>
-            <input type="text" id="walletAddress" placeholder="Адрес TON/Jetton кошелька">
-            <input type="text" id="walletAlias" placeholder="Метка (например, 'Мой основной')">
-            <button id="addWalletButton">Добавить</button>
-        </section>
-
-        <section id="watchlistSection">
-            <h2>Мой Watchlist</h2>
-            <button id="refreshWatchlistButton">Обновить список</button>
-            <ul id="walletList">
-                </ul>
-        </section>
-
-        <section id="walletDetailsSection" style="display:none;">
-            <h2>Детали кошелька <span id="detailsAddress"></span></h2>
-            <button id="backToWatchlistButton">Назад к списку</button>
-            <div id="walletSummary">
-                <p><strong>Метка:</strong> <span id="summaryAlias">-</span></p>
-                <p><strong>Баланс:</strong> <span id="summaryBalance">-</span></p>
-                <p><strong>Кол-во транзакций:</strong> <span id="summaryTxCount">-</span></p>
-                <p><strong>Активность:</strong> <span id="summaryActivity">-</span></p>
-            </div>
-            <h3>Редактировать</h3>
-            <div id="editAliasGroupForm">
-                <input type="text" id="editAliasInput" placeholder="Новая метка (alias)">
-                <input type="text" id="editGroupInput" placeholder="Новая группа (опционально)">
-                <button id="saveAliasGroupButton">💾 Сохранить</button>
-            </div>
-            <h3>История транзакций (последние <span id="txLimit"></span>)</h3>
-            <ul id="transactionHistory">
-                </ul>
-            <h3>Визуализация графа</h3>
-            <div id="visGraphContainer" style="height: 400px; background: #fff; border-radius: 8px; margin-top: 10px;"></div>
-        </section>
+    <!-- Переключатель языка -->
+    <div class="lang-select">
+      <select id="languageSwitcher">
+        <option value="ru">Русский</option>
+        <option value="uk">Українська</option>
+        <option value="en">English</option>
+      </select>
     </div>
 
-    <script src="script.js"></script>
+    <!-- === Секция «Добавить кошелек» === -->
+    <section id="addWalletSection">
+      <input
+        id="walletAddress"
+        type="text"
+        data-i18n-placeholder="placeholder_wallet_address"
+        placeholder="Адрес кошелька"
+      />
+      <input
+        id="walletAlias"
+        type="text"
+        data-i18n-placeholder="placeholder_wallet_alias"
+        placeholder="Метка (опционально)"
+      />
+      <button id="addWalletButton" data-i18n="add_wallet">Добавить</button>
+      <button id="refreshWatchlistButton" data-i18n="refresh_watchlist">Обновить список</button>
+    </section>
+
+    <!-- === Секция «Поиск» === -->
+    <section id="searchSection">
+      <input
+        id="searchInput"
+        type="text"
+        data-i18n-placeholder="placeholder_search"
+        placeholder="Поиск кошелька..."
+      />
+      <button id="searchButton" data-i18n="search">Поиск</button>
+      <ul id="searchResults"></ul>
+    </section>
+
+    <!-- === Секция «Watchlist» === -->
+    <section id="watchlistSection">
+      <ul id="walletList">
+        <!-- Сюда попадут элементы списка через fetchWatchlist -->
+      </ul>
+    </section>
+
+    <!-- === Секция «Детали кошелька» === -->
+    <section id="walletDetailsSection" class="hidden">
+      <!-- Внутренняя кнопка «Назад» для деталей (необязательно, можно использовать globalBackButton) -->
+      <button id="backToWatchlistButton" data-i18n="back">Назад</button>
+
+      <h2 id="detailsAddress">Адрес кошелька</h2>
+      <p>
+        <strong data-i18n="balance">Баланс</strong>: <span id="summaryBalance">-</span>
+      </p>
+      <p>
+        <strong data-i18n="tx_count">Кол-во транзакций</strong>: <span id="summaryTxCount">-</span>
+      </p>
+      <p>
+        <strong data-i18n="last_activity">Последняя активность</strong>: <span id="summaryActivity">-</span>
+      </p>
+      <p>
+        <strong data-i18n="is_scam">Скам?</strong>: <span id="summaryIsScam">-</span>
+      </p>
+      <p>
+        <strong data-i18n="alias">Метка</strong>: <span id="summaryAlias">-</span>
+      </p>
+      <p>
+        <strong data-i18n="group">Группа</strong>: <span id="summaryGroup">-</span>
+      </p>
+
+      <input
+        id="editAliasInput"
+        type="text"
+        data-i18n-placeholder="placeholder_wallet_alias"
+        placeholder="Метка (опционально)"
+      />
+      <input
+        id="editGroupInput"
+        type="text"
+        placeholder="Группа (опционально)"
+      />
+      <button id="saveAliasGroupButton" data-i18n="save">Сохранить</button>
+
+      <hr />
+
+      <h3 data-i18n="loading_tx_history">
+        История транзакций (последние <span id="txLimit">10</span>)
+      </h3>
+      <ul id="transactionHistory"></ul>
+
+      <h3 data-i18n="graph">Граф транзакций</h3>
+      <div id="visGraphContainer" style="height: 400px; background: var(--secondary-bg);"></div>
+    </section>
+  </div>
+
+  <!-- MAIN SCRIPT: импортируем модули и запускаем initApp -->
+  <script type="module">
+    import { applyTelegramTheme, applyTranslations, initLanguageSwitcher } from './lang.js';
+    import { initApp } from './events.js';
+
+    applyTelegramTheme();
+    applyTranslations();
+    initLanguageSwitcher();
+
+    // Telegram.WebApp.ready() уже вызывается внутри initApp,
+    // но можно продублировать здесь, чтобы точно WebApp был готов.
+    window.Telegram.WebApp.ready();
+    initApp(window.Telegram.WebApp);
+  </script>
 </body>
 </html>
