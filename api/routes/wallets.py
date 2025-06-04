@@ -326,10 +326,18 @@ async def export_wallet_history(address: str, format: str = Query("json", enum=[
 
 
 @router.get("/graph", response_model=GraphResponse, summary="Построить граф связей для кошельков пользователя")
-async def get_connection_graph_api(telegram_user_id: int = Query(...),
-                                   depth: int = Query(1, ge=1, le=2, description="Глубина анализа связей (1 или 2)"),
-                                   target_address: Optional[str] = Query(None,
-                                                                         description="Центральный адрес для графа (если не указан, используются все из Watchlist)")):
+async def get_connection_graph_api(
+    telegram_user_id: int = Query(...),
+    depth: int = Query(1, ge=1, le=2, description="Глубина анализа связей (1 или 2)"),
+    target_address: Optional[str] = Query(
+        None,
+        description="Центральный адрес для графа (если не указан, используются все из Watchlist)",
+    ),
+    incoming: bool = Query(True, description="Включать входящие транзакции"),
+    outgoing: bool = Query(True, description="Включать исходящие транзакции"),
+    jetton_only: bool = Query(False, description="Только JettonTransfer"),
+    min_value: float = Query(0.0, description="Мин. сумма TON/Jetton для ребра"),
+):
     """
     Строит граф связей.
     Если target_address указан, граф строится вокруг него.
@@ -420,13 +428,14 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                     # Упрощенный анализ: ищем TonTransfer или JettonTransfer
                     sender, recipient = None, None
                     amount_str = ""
+                    amount_val = 0.0
 
                     if action.get("type") == "TonTransfer":
                         transfer = action.get("TonTransfer", {})
                         sender = transfer.get("sender", {}).get("address")
                         recipient = transfer.get("recipient", {}).get("address")
-                        amount = int(transfer.get("amount", 0)) / 1e9
-                        amount_str = f"{amount:.2f} TON"
+                        amount_val = int(transfer.get("amount", 0)) / 1e9
+                        amount_str = f"{amount_val:.2f} TON"
                     elif action.get("type") == "JettonTransfer":
                         transfer = action.get("JettonTransfer", {})
                         sender = transfer.get("sender", {}).get("address")
@@ -435,8 +444,16 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                         decimals = int(jetton_info.get("decimals", 9) or 9)
                         amount_val = int(transfer.get("amount", 0)) / (10 ** decimals)
                         amount_str = f"{amount_val:.2f} {jetton_info.get('symbol', 'JTN')}"
-
+                    
                     if sender and recipient:
+                        if jetton_only and action.get("type") != "JettonTransfer":
+                            continue
+                        if amount_val < min_value:
+                            continue
+                        if not incoming and recipient in root_wallet_addresses:
+                            continue
+                        if not outgoing and sender in root_wallet_addresses:
+                            continue
                         # Добавляем узлы, если их еще нет
                         for addr in [sender, recipient]:
                             if addr not in nodes_dict:
@@ -453,11 +470,11 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                             if addr == sender:
                                 nodes_dict[addr].meta.out_tx_count += 1
                                 if action.get("type") == "TonTransfer":
-                                    nodes_dict[addr].meta.total_ton_out += amount
+                                    nodes_dict[addr].meta.total_ton_out += amount_val
                             if addr == recipient:
                                 nodes_dict[addr].meta.in_tx_count += 1
                                 if action.get("type") == "TonTransfer":
-                                    nodes_dict[addr].meta.total_ton_in += amount
+                                    nodes_dict[addr].meta.total_ton_in += amount_val
 
                         # Добавляем ребро
                         edges_list.append(GraphEdge(
@@ -497,14 +514,22 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                     if act_type == "TonTransfer":
                         sender = act.get("sender")
                         recipient = act.get("recipient")
-                        amount = act.get("amount_ton") or 0
-                        amount_str = f"{amount:.2f} TON"
+                        amount_val = act.get("amount_ton") or 0
+                        amount_str = f"{amount_val:.2f} TON"
                     elif act_type == "JettonTransfer":
                         sender = act.get("sender")
                         recipient = act.get("recipient")
-                        amount = act.get("amount") or 0
-                        amount_str = f"{amount:.2f} {act.get('jetton_symbol', '')}"
+                        amount_val = act.get("amount") or 0
+                        amount_str = f"{amount_val:.2f} {act.get('jetton_symbol', '')}"
                     if sender and recipient:
+                        if jetton_only and act_type != "JettonTransfer":
+                            continue
+                        if amount_val < min_value:
+                            continue
+                        if not incoming and recipient in root_wallet_addresses:
+                            continue
+                        if not outgoing and sender in root_wallet_addresses:
+                            continue
                         for a in [sender, recipient]:
                             if a not in nodes_dict:
                                 nodes_dict[a] = GraphNode(

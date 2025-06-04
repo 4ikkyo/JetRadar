@@ -1,160 +1,214 @@
 // events.js
-import { fetchWatchlist, addWallet } from './watchlist.js';
-import { showWalletDetails, showWatchlistScreen } from './details.js';
-import { ui } from './uiElements.js';
-import { t } from './lang.js';
-import { createWalletListItem } from './utils.js';
+import { fetchWatchlist, addWallet, setCurrentTelegramUser } from './watchlist.js';
+import {
+    showWalletDetails,
+    showWatchlistScreen,
+    renderTransactionHistory,
+    refreshGraphFiltersAndFetchData,
+    saveAliasAndGroup
+} from './details.js';
+import { ui, setLoadingState } from './uiElements.js';
+import { t, applyTranslations, initLanguageSwitcher, applyTelegramTheme } from './lang.js';
+import { createWalletListItem, showAlert } from './utils.js';
 import { fetchAPI } from './api.js';
+
+let currentTelegramUser = null; // Храним данные пользователя Telegram
 
 /**
  * Базовая точка входа: инициализируем WebApp, навешиваем все обработчики.
+ * @param {object} tg - Объект Telegram WebApp.
  */
 export function initApp(tg) {
-  tg.ready();
-  tg.expand();
+  tg.ready(); // Сообщаем Telegram, что WebApp готов
+  tg.expand(); // Растягиваем WebApp на весь экран
 
-  let telegramUserId = null;
+  // Устанавливаем текущую тему и язык
+  applyTelegramTheme();
+  initLanguageSwitcher(); // Инициализирует и применяет переводы в первый раз
+  applyTranslations(); // Применяем переводы ко всему документу
 
+  // Получаем данные пользователя Telegram
   if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    telegramUserId = tg.initDataUnsafe.user.id;
-    const user = tg.initDataUnsafe.user;
-    const userName =
-      user.username || `${user.first_name} ${user.last_name || ''}`.trim();
-    ui.userInfoP.textContent = `Пользователь: ${userName} (ID: ${telegramUserId})`;
+    currentTelegramUser = tg.initDataUnsafe.user;
+    setCurrentTelegramUser(currentTelegramUser); // Передаем в watchlist.js
+    const userName = currentTelegramUser.username
+      ? `@${currentTelegramUser.username}`
+      : `${currentTelegramUser.first_name || ''} ${currentTelegramUser.last_name || ''}`.trim();
+    ui.userInfoP.textContent = t('user_greeting', { name: userName, id: currentTelegramUser.id, default: `User: ${userName} (ID: ${currentTelegramUser.id})` });
   } else {
-    telegramUserId = 591582190; // Тестовый ID
-    ui.userInfoP.textContent = t('test_mode', { id: telegramUserId });
+    // Тестовый режим или ошибка получения пользователя
+    const testUserId = 'test_user_007';
+    currentTelegramUser = { id: testUserId, first_name: "Test", last_name: "User" }; // Фиктивный пользователь
+    setCurrentTelegramUser(currentTelegramUser);
+    ui.userInfoP.textContent = t('test_mode', { id: testUserId });
+    console.warn('Telegram user data not available. Running in test mode.');
   }
 
-  // --- Навешиваем кнопку Back, которая ведёт:
-  // --- * Если на главном экране: tg.close()
-  // --- * Если на экране деталей: возвращает на главный
-  if (ui.globalBackButton) {
-    ui.globalBackButton.addEventListener('click', () => {
-      const isDetailsVisible = !ui.walletDetailsSection.classList.contains('hidden');
-      if (isDetailsVisible) {
-        // Сейчас открыт экран «Детали» → возвращаем на главный
-        showWatchlistScreen(tg, telegramUserId);
-      } else {
-        // Уже на главном экране → закрываем WebApp
-        tg.close();
-      }
-    });
-  }
-
-  // Сразу загружаем Watchlist
-  fetchWatchlist(tg, telegramUserId);
-
-  // Кнопки «Добавить кошелек» и «Обновить список»
-  if (ui.addWalletButton) {
-    ui.addWalletButton.addEventListener('click', () =>
-      addWallet(tg, telegramUserId)
-    );
-  }
-  if (ui.refreshWatchlistButton) {
-    ui.refreshWatchlistButton.addEventListener('click', () =>
-      fetchWatchlist(tg, telegramUserId)
-    );
-  }
-
-  // Клик на <li> из Watchlist
-  if (ui.walletListUl) {
-    ui.walletListUl.addEventListener('click', event => {
-      const li = event.target.closest('li');
-      if (!li) return;
-      const address = li.dataset.address;
-      const alias = li.dataset.alias;
-      const group = li.dataset.group;
-      const wallet = { address, alias, group };
-      showWalletDetails(wallet, tg, telegramUserId, fetchWatchlist);
-    });
-  }
-
-  // Кнопка «Назад» внутри экрана деталей
-  if (ui.backToWatchlistButton) {
-    ui.backToWatchlistButton.addEventListener('click', () => {
-      showWatchlistScreen(tg, telegramUserId);
-    });
-  }
+  // --- Обработчик для кнопки "Назад" Telegram ---
   tg.BackButton.onClick(() => {
-    showWatchlistScreen(tg, telegramUserId);
+    // Проверяем, виден ли экран деталей
+    const isDetailsVisible = ui.walletDetailsSection.style.display === 'block';
+    if (isDetailsVisible) {
+      showWatchlistScreen(tg);
+    } else {
+      // Если мы на главном экране, то кнопка "Назад" должна закрывать WebApp
+      // Однако, Telegram сам обрабатывает это, если кнопка видима.
+      // Если вы хотите кастомное поведение (например, подтверждение), можно добавить здесь.
+      // tg.close(); // Обычно не нужно, если BackButton видна и мы не на экране деталей
+    }
   });
 
-  // Навешиваем логику поиска (если все элементы присутствуют)
+
+  // --- Секция «Добавить кошелек» ---
+  if (ui.addWalletButton) {
+    ui.addWalletButton.addEventListener('click', () => addWallet(tg));
+  }
+  if (ui.walletAddressInput) {
+      ui.walletAddressInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter') ui.addWalletButton.click();
+      });
+  }
+   if (ui.walletAliasInput) {
+      ui.walletAliasInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter') ui.addWalletButton.click();
+      });
+  }
+
+
+  // --- Секция «Поиск» ---
   if (ui.searchButton && ui.searchInput && ui.searchResultsUl) {
-    ui.searchButton.addEventListener('click', () =>
-      performSearch(tg, telegramUserId)
-    );
+    ui.searchButton.addEventListener('click', () => performSearch(tg));
     ui.searchInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') performSearch(tg, telegramUserId);
+      if (e.key === 'Enter') performSearch(tg);
     });
   }
 
-  // Обработка URL-параметра graph_target (глубокая ссылка)
-  handleUrlParams(tg, telegramUserId);
-}
-
-/**
- * Если в URL есть ?graph_target=..., сразу показываем экран деталей.
- */
-function handleUrlParams(tg, telegramUserId) {
-  const urlParams = new URLSearchParams(window.location.search);
-  const graphTargetAddress = urlParams.get('graph_target');
-  if (graphTargetAddress && telegramUserId) {
-    const pseudoWallet = {
-      address: graphTargetAddress,
-      alias: `Graph: ${graphTargetAddress.substring(0, 6)}…`,
-      group: ''
-    };
-    showWalletDetails(pseudoWallet, tg, telegramUserId, fetchWatchlist);
+  // --- Секция «Watchlist» ---
+  if (ui.refreshWatchlistButton) {
+    ui.refreshWatchlistButton.addEventListener('click', () => fetchWatchlist(tg));
   }
+  // Клик на элемент списка Watchlist (делегирование событий)
+  // Перенесено в fetchWatchlist, где создаются элементы
+
+
+  // --- Секция «Детали кошелька» ---
+  // Кнопка "Сохранить" для метки/группы
+  if (ui.saveAliasGroupButton) {
+    ui.saveAliasGroupButton.addEventListener('click', saveAliasAndGroup);
+  }
+
+  // Фильтры истории транзакций
+  if (ui.txSortSelect) {
+    ui.txSortSelect.addEventListener('change', renderTransactionHistory);
+  }
+  if (ui.txTypeFilter) {
+    ui.txTypeFilter.addEventListener('change', renderTransactionHistory);
+  }
+
+  // Фильтры графа
+  if (ui.applyGraphFiltersButton) {
+    ui.applyGraphFiltersButton.addEventListener('click', refreshGraphFiltersAndFetchData);
+  }
+  // Можно добавить обработчики onchange для чекбоксов и инпута графа,
+  // чтобы кнопка "Применить" становилась активной или для мгновенного обновления (если нужно)
+  // Например:
+  // const graphFilterElements = [ui.filterIncomingCheckbox, ui.filterOutgoingCheckbox, ui.filterJettonCheckbox, ui.minAmountInput];
+  // graphFilterElements.forEach(el => {
+  //   if (el) el.addEventListener('change', () => { /* логика активации кнопки "Применить" */ });
+  // });
+
+
+  // Первоначальная загрузка Watchlist
+  if (currentTelegramUser && currentTelegramUser.id) {
+    fetchWatchlist(tg);
+  } else {
+    showAlert(t('telegram_id_missing_on_init', { default: 'Не удалось определить пользователя Telegram при инициализации.' }), 'error');
+  }
+
+  // Обработка URL-параметра для глубокой ссылки на граф (если нужно)
+  handleUrlParams(tg);
+
+  // Слушаем событие смены языка для обновления UI, если нужно (например, тексты кнопок)
+  document.addEventListener('languageChanged', () => {
+    // Обновить тексты, которые не обновляются через data-i18n, если такие есть
+    // Например, текст на кнопках, который устанавливается динамически
+    if (ui.addWalletButton.dataset.originalText) { // Если кнопка в состоянии загрузки
+        ui.addWalletButton.dataset.originalText = t('add_wallet');
+    } else {
+        ui.addWalletButton.innerHTML = t('add_wallet');
+    }
+    // ... и для других кнопок/элементов по аналогии
+  });
 }
 
 /**
- * Функция поиска кошельков (GET /wallet/wallets/search?query=...).
+ * Функция поиска кошельков.
+ * @param {object} tg - Объект Telegram WebApp.
  */
-async function performSearch(tg, telegramUserId) {
+async function performSearch(tg) {
+  if (!currentTelegramUser?.id) {
+    showAlert(t('telegram_id_missing'), 'error');
+    return;
+  }
+
   const query = ui.searchInput.value.trim();
   if (query.length < 3) {
-    ui.searchResultsUl.innerHTML = `<li>${t('search_min_chars')}</li>`;
+    ui.searchResultsUl.innerHTML = `<li class="tx-empty">${t('search_min_chars')}</li>`;
     return;
   }
-  if (!telegramUserId) {
-    ui.searchResultsUl.innerHTML = `<li>${t('telegram_id_missing')}</li>`;
-    return;
-  }
-  setSearchLoading(true);
-  ui.searchResultsUl.innerHTML = `<li>${t('search_loading')}</li>`;
+
+  setLoadingState(ui.searchButton, true, 'button', t('search'));
+  setLoadingState(ui.searchResultsContainer, true, 'container');
+  ui.searchResultsUl.innerHTML = ''; // Очищаем перед загрузкой
 
   const result = await fetchAPI(
-    '/wallet/wallets/search',
+    '/wallet/wallets/search', // Предполагаем, что такой эндпоинт есть
     'GET',
     { query },
-    telegramUserId
+    currentTelegramUser.id
   );
-  setSearchLoading(false);
 
-  ui.searchResultsUl.innerHTML = '';
+  setLoadingState(ui.searchButton, false, 'button', t('search'));
+  setLoadingState(ui.searchResultsContainer, false, 'container');
+
   if (result.error) {
-    ui.searchResultsUl.innerHTML = `<li>${t('search_error')}</li>`;
+    ui.searchResultsUl.innerHTML = `<li class="tx-empty">${t('search_error')}: ${result.message}</li>`;
     return;
   }
+
   const results = Array.isArray(result) ? result : [];
   if (results.length > 0) {
     results.forEach(wallet => {
-      const li = createWalletListItem(wallet);
+      const li = createWalletListItem(wallet); // onDelete здесь не нужен для результатов поиска
       li.addEventListener('click', () => {
-        showWalletDetails(wallet, tg, telegramUserId, fetchWatchlist);
+        // Передаем fetchWatchlist как callback, если поиск может добавить кошелек в watchlist
+        // или если нужно обновить watchlist после каких-то действий на экране деталей
+        showWalletDetails(wallet, tg, currentTelegramUser.id, () => fetchWatchlist(tg));
       });
       ui.searchResultsUl.appendChild(li);
     });
   } else {
-    ui.searchResultsUl.innerHTML = `<li>${t('search_none_found')}</li>`;
+    ui.searchResultsUl.innerHTML = `<li class="tx-empty">${t('search_none_found')}</li>`;
   }
 }
 
-function setSearchLoading(isLoading) {
-  ui.searchButton.disabled = isLoading;
-  ui.searchButton.textContent = isLoading ? t('loading') : t('search');
-}
+/**
+ * Обрабатывает URL-параметры для глубоких ссылок (например, ?address=...).
+ * @param {object} tg - Объект Telegram WebApp.
+ */
+function handleUrlParams(tg) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetAddress = urlParams.get('address') || urlParams.get('graph_target');
 
+  if (targetAddress && currentTelegramUser?.id) {
+    // Создаем псевдо-объект кошелька для отображения деталей
+    // Можно сначала попытаться найти его в watchlist или через API для получения alias/group
+    const pseudoWallet = {
+      address: targetAddress,
+      // alias: `From URL: ${targetAddress.substring(0, 6)}…`,
+      // group: ''
+    };
+    // Передаем fetchWatchlist как callback
+    showWalletDetails(pseudoWallet, tg, currentTelegramUser.id, () => fetchWatchlist(tg));
+  }
+}
