@@ -1,17 +1,17 @@
 # bot/handlers/commands.py
 
 import httpx # Используем httpx для асинхронных запросов
-from aiogram import Router, F, types
+from aiogram import Router, types
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from aiogram.filters import Command
 from datetime import datetime
 import logging
+from config import BACKEND_URL as API_BASE_URL
 
 bot_logger = logging.getLogger(__name__) # Логгер для команд бота
 logging.basicConfig(level=logging.INFO) # Убедитесь, что логирование настроено
 
-# API_BASE_URL должен указывать на ваш запущенный FastAPI сервер
-API_BASE_URL = "http://127.0.0.1:8000" # Убедитесь, что порт и хост верны
+# API_BASE_URL определяется в config.py и указывает на адрес запущенного FastAPI сервера
 
 router = Router()
 
@@ -65,7 +65,7 @@ async def add_wallet_via_api(message: Message):
             try:
                 # Попытка разобрать JSON в любом случае, чтобы увидеть, что пришло
                 response_data = response.json()
-            except Exception as json_e:
+            except Exception:
                 bot_logger.error(
                     f"Не удалось разобрать JSON из ответа API. Статус: {response.status_code}. Тело: {response.text}",
                     exc_info=True)
@@ -191,14 +191,16 @@ async def tx_history_via_api(message: types.Message):
             status = action.get("status", "N/A")
             desc = action.get("description", "")
             line = f"— {action_type} ({status})"
-            if desc: line += f": {desc}"
+            if desc:
+                line += f": {desc}"
 
 
             if action_type == "TON Transfer":
                 val = action.get("amount_ton", 0)
                 direction = "📤 OUT" if action.get("is_send") else "📥 IN"
                 line = f"💸 {direction} {val:.4f} TON"
-                if action.get('comment'): line += f" ({action.get('comment')})"
+                if action.get('comment'):
+                    line += f" ({action.get('comment')})"
             elif action_type == "Jetton Transfer":
                 val = action.get("amount", 0)
                 sym = action.get("jetton_symbol", "JTN")
@@ -209,8 +211,12 @@ async def tx_history_via_api(message: types.Message):
                 direction = "📤 OUT" if action.get("is_send") else "📥 IN"
                 line = f"🖼️ {direction} {name}"
             elif action_type == "Swap":
-                line = f"🔄 Swap: {action.get('amount_in', 0):.2f} {action.get('asset_in')} → {action.get('amount_out', 0):.2f} {action.get('asset_out')}"
-                if action.get('dex'): line += f" via {action.get('dex')}"
+                line = (
+                    f"🔄 Swap: {action.get('amount_in', 0):.2f} {action.get('asset_in')}"
+                    f" → {action.get('amount_out', 0):.2f} {action.get('asset_out')}"
+                )
+                if action.get('dex'):
+                    line += f" via {action.get('dex')}"
 
             event_lines.append(f"  {line}")
 
@@ -234,33 +240,41 @@ async def wallet_summary_via_api(message: Message):
 
     async with httpx.AsyncClient() as client:
         try:
-            params = {"telegram_user_id": message.from_user.id,
-                      "address": address}  # address в URL, но для API может быть проще так
-            # Правильный URL для FastAPI будет /wallet/{address}/summary?telegram_user_id=...
-            response = await client.get(f"{API_BASE_URL}/wallet/{address}/summary",
-                                        params={"telegram_user_id": message.from_user.id})
+            response = await client.get(
+                f"{API_BASE_URL}/wallet/{address}/summary",
+                params={"telegram_user_id": message.from_user.id},
+            )
 
             if response.status_code == 200:
                 summary = response.json()
                 text = f"<b>📊 Зведення по гаманцю:</b> <code>{summary['address']}</code>\n"
-                if summary.get('alias'): text += f"<b>Метка:</b> <i>{summary['alias']}</i>\n"
-                if summary.get('group'): text += f"<b>Група:</b> [{summary['group']}]\n"
-                if summary.get('balance_ton') is not None: text += f"<b>Баланс TON:</b> {summary['balance_ton']:.4f}💎\n"
-                if summary.get(
-                    'total_tx_count') is not None: text += f"<b>Всього транзакцій (збережено):</b> {summary['total_tx_count']}\n"
-                if summary.get(
-                    'first_activity_ts'): text += f"<b>Перша активність:</b> {datetime.utcfromtimestamp(summary['first_activity_ts']).strftime('%Y-%m-%d %H:%M')}\n"
-                if summary.get(
-                    'last_activity_ts'): text += f"<b>Остання активність:</b> {datetime.utcfromtimestamp(summary['last_activity_ts']).strftime('%Y-%m-%d %H:%M')}\n"
-                if summary.get(
-                    'is_scam') is not None: text += f"<b>Scam:</b> {'🔴 Так' if summary['is_scam'] else '🟢 Ні'}\n"
+                if summary.get('alias'):
+                    text += f"<b>Метка:</b> <i>{summary['alias']}</i>\n"
+                if summary.get('group'):
+                    text += f"<b>Група:</b> [{summary['group']}]\n"
+                if summary.get('balance_ton') is not None:
+                    text += f"<b>Баланс TON:</b> {summary['balance_ton']:.4f}💎\n"
+                if summary.get('total_tx_count') is not None:
+                    text += (
+                        f"<b>Всього транзакцій (збережено):</b> {summary['total_tx_count']}\n"
+                    )
+                if summary.get('first_activity_ts'):
+                    text += (
+                        f"<b>Перша активність:</b> {datetime.utcfromtimestamp(summary['first_activity_ts']).strftime('%Y-%m-%d %H:%M')}\n"
+                    )
+                if summary.get('last_activity_ts'):
+                    text += (
+                        f"<b>Остання активність:</b> {datetime.utcfromtimestamp(summary['last_activity_ts']).strftime('%Y-%m-%d %H:%M')}\n"
+                    )
+                if summary.get('is_scam') is not None:
+                    text += f"<b>Scam:</b> {'🔴 Так' if summary['is_scam'] else '🟢 Ні'}\n"
                 await message.answer(text, parse_mode="HTML")
             else:
                 # ... (обработка ошибок как в /add)
                 error_detail = "Невідома помилка"
                 try:
                     error_detail = response.json().get('detail', response.text)
-                except:
+                except Exception:
                     error_detail = response.text[:200]
                 await message.answer(
                     f"⚠️ Помилка отримання зведення ({response.status_code}):\n<code>{error_detail}</code>",
@@ -295,8 +309,10 @@ async def search_wallets_command(message: Message):
                 text = f"<b>🔍 Результати пошуку за \"{query_text}\":</b>\n"
                 for res_wallet in results:
                     text += f"• <code>{res_wallet['address']}</code>"
-                    if res_wallet.get('alias'): text += f" (<i>{res_wallet['alias']}</i>)"
-                    if res_wallet.get('group'): text += f" [{res_wallet['group']}]"
+                    if res_wallet.get('alias'):
+                        text += f" (<i>{res_wallet['alias']}</i>)"
+                    if res_wallet.get('group'):
+                        text += f" [{res_wallet['group']}]"
                     text += "\n"
                 await message.answer(text, parse_mode="HTML")
             # ... (обработка ошибок)
@@ -304,7 +320,7 @@ async def search_wallets_command(message: Message):
                 error_detail = "Невідома помилка"
                 try:
                     error_detail = response.json().get('detail', response.text)
-                except:
+                except Exception:
                     error_detail = response.text[:200]
                 await message.answer(f"⚠️ Помилка пошуку ({response.status_code}):\n<code>{error_detail}</code>",
                                      parse_mode="HTML")

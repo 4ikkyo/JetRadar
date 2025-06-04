@@ -1,6 +1,6 @@
 # db/models.py
 
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, UniqueConstraint, func, DECIMAL, Boolean, TEXT
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, UniqueConstraint, DECIMAL, Boolean, TEXT
 from sqlalchemy.orm import declarative_base, relationship
 import datetime
 

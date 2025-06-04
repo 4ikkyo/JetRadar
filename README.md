@@ -16,20 +16,25 @@ JetRadar — це бот і API для моніторингу активност
    git clone <url репозиторію>
    cd JetRadar
    ```
-2. **Створіть віртуальне середовище** та активуйте його:
+2. **Скопіюйте зразок файлу `.env.example` і відредагуйте значення:**
+   ```bash
+   cp .env.example .env
+   # відкрийте .env та заповніть свої дані
+   ```
+3. **Створіть віртуальне середовище** та активуйте його:
    ```bash
    python3 -m venv venv
    source venv/bin/activate
    ```
-3. **Встановіть залежності**:
+4. **Встановіть залежності**:
    ```bash
    pip install -r requirements.txt
    ```
-4. **Запустіть API**:
+5. **Запустіть API**:
    ```bash
    uvicorn api.main:app --reload
    ```
-5. **Запустіть Telegram-бота** в іншій консолі:
+6. **Запустіть Telegram-бота** в іншій консолі:
    ```bash
    python bot/main.py
    ```

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from fastapi import APIRouter, Query, HTTPException
 from sqlalchemy import select
@@ -8,14 +8,12 @@ import os
 from dotenv import load_dotenv
 import logging # <--- Добавляем logging
 import json # Для работы с actions_json
-from fastapi import Depends, Response # Для Depends и экспорта
-from sqlalchemy.orm import selectinload, joinedload
+from fastapi import Response  # Для экспорта
+from sqlalchemy.orm import selectinload
 from typing import List, Optional # Для типизации
 import csv
 import io # Для экспорта CSV
 
-from api.scheduler import fetch_and_store_wallet_activity
-# Убедитесь, что пути импорта корректны
 from db.models import User, Wallet, UserWallet, Transaction
 from db.db_init import async_session
 
@@ -304,7 +302,10 @@ async def export_wallet_history(address: str, format: str = Query("json", enum=[
         elif format == "csv":
             output = io.StringIO()
             if not export_data:  # Если после разбора actions ничего нет
-                return Response("Нет данных для CSV экспорта.", media_type="text/plain")
+                return Response(
+                    "Нет данных для CSV экспорта.",
+                    media_type="text/plain",
+                )
 
             writer = csv.DictWriter(output, fieldnames=export_data[0].keys())
             writer.writeheader()
@@ -373,10 +374,14 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
         processed_addresses = set()  # Для избежания циклов и повторной обработки
 
         for _ in range(depth):  # Итерации по глубине
-            if not current_level_addresses: break
+            if not current_level_addresses:
+                break
 
-            addresses_to_query_this_level = list(current_level_addresses - processed_addresses)
-            if not addresses_to_query_this_level: break
+            addresses_to_query_this_level = list(
+                current_level_addresses - processed_addresses
+            )
+            if not addresses_to_query_this_level:
+                break
 
             processed_addresses.update(addresses_to_query_this_level)
             next_level_addresses = set()
@@ -387,9 +392,13 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                 .outerjoin(UserWallet, (Wallet.id == UserWallet.wallet_id) & (UserWallet.user_id == user.id))
                 .where(Wallet.address.in_(addresses_to_query_this_level))
             )
-            wallet_id_map = {res.address: (res.id, res.alias) for res in wallet_ids_q.all()}
+            wallet_id_map = {
+                res.address: (res.id, res.alias)
+                for res in wallet_ids_q.all()
+            }
 
-            if not wallet_id_map: continue  # Нет таких кошельков в нашей БД
+            if not wallet_id_map:
+                continue  # Нет таких кошельков в нашей БД
 
             db_transactions_q = await session.execute(
                 select(Transaction, Wallet.address.label("source_wallet_address"))
@@ -437,10 +446,12 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                             # Обновляем метаданные узлов
                             if addr == sender:
                                 nodes_dict[addr].meta.out_tx_count += 1
-                                if action.get("type") == "TonTransfer": nodes_dict[addr].meta.total_ton_out += amount
+                                if action.get("type") == "TonTransfer":
+                                    nodes_dict[addr].meta.total_ton_out += amount
                             if addr == recipient:
                                 nodes_dict[addr].meta.in_tx_count += 1
-                                if action.get("type") == "TonTransfer": nodes_dict[addr].meta.total_ton_in += amount
+                                if action.get("type") == "TonTransfer":
+                                    nodes_dict[addr].meta.total_ton_in += amount
 
                         # Добавляем ребро
                         edges_list.append(GraphEdge(
@@ -744,14 +755,14 @@ async def get_wallet_history_from_tonapi(address: str, limit: int = Query(5, ge=
                     if isinstance(asset_info, str) and asset_info.lower() == "ton":
                         try:
                             a = int(raw_amount_str) / 1e9
-                        except:
+                        except (ValueError, TypeError):
                             a = 0.0
                         return ("TON", a, None, None)
                     elif isinstance(asset_info, dict):
                         dec = asset_info.get("decimals", 9)
                         try:
                             a = int(raw_amount_str) / (10 ** dec)
-                        except:
+                        except (ValueError, TypeError):
                             a = 0.0
                         return (
                             asset_info.get("symbol", "JETTON"),

@@ -3,17 +3,15 @@ import json
 import os
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import create_async_engine
 import logging
 import httpx  # Для запросов к TonAPI
 from datetime import datetime, timedelta
 
 # Импорты из вашего проекта
-from db.db_init import DATABASE_URL, async_session  # DATABASE_URL нужен для jobstore
-from db.models import Wallet, Transaction, UserWallet, User
-from sqlalchemy import select, update, delete
+from db.db_init import async_session
+from db.models import Wallet, Transaction
+from sqlalchemy import select, update
 
 
 load_dotenv()
@@ -149,7 +147,10 @@ async def scheduled_wallet_updates():
 
         wallets_to_update_result = await session.execute(
             select(Wallet.id, Wallet.address)
-            .where((Wallet.last_balance_updated_at == None) | (Wallet.last_balance_updated_at < ten_minutes_ago))
+            .where(
+                (Wallet.last_balance_updated_at.is_(None))
+                | (Wallet.last_balance_updated_at < ten_minutes_ago)
+            )
             # .order_by(Wallet.last_balance_updated_at.asc().nulls_first()) # Обновляем самые старые сначала
             # .limit(20) # Ограничиваем количество кошельков за один проход, чтобы не перегружать TonAPI
         )
