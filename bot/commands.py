@@ -217,6 +217,13 @@ async def tx_history_via_api(message: types.Message):
                 )
                 if action.get('dex'):
                     line += f" via {action.get('dex')}"
+            elif action_type == "JettonSwap":
+                line = (
+                    f"🔄 {action.get('ton_in', 0):.2f} TON"
+                    f" → {action.get('amount_out', 0):.2f} {action.get('jetton_symbol', '')}"
+                )
+                if action.get('dex'):
+                    line += f" via {action.get('dex')}"
 
             event_lines.append(f"  {line}")
 

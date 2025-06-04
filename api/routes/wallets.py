@@ -135,11 +135,13 @@ class ActionResponse(BaseModel):
     # nft_address: Optional[str] = None
 
     # Swap-поля, если нужно
-    # dex: Optional[str] = None
+    ton_in: Optional[float] = None
+    amount_out: Optional[float] = None
+    dex: Optional[str] = None
+    is_swap: Optional[bool] = None
     # asset_in: Optional[str] = None
     # amount_in: Optional[float] = None
     # asset_out: Optional[str] = None
-    # amount_out: Optional[float] = None
     # и т. д.
 
 
@@ -292,8 +294,11 @@ async def export_wallet_history(address: str, format: str = Query("json", enum=[
                     "action_index": action_idx,
                     "action_type": action.get("type"),
                     "action_status": action.get("status"),
-                    "action_description": action.get("simplePreview", {}).get("description") if isinstance(
-                        action.get("simplePreview"), dict) else str(action.get("simplePreview", "")),
+                    "action_description": (
+                        action.get("simple_preview") or action.get("simplePreview", {})
+                    ).get("description") if isinstance(
+                        action.get("simple_preview") or action.get("simplePreview"), dict
+                    ) else str(action.get("simple_preview") or action.get("simplePreview", "")),
                     # Можно добавить больше полей из action в зависимости от типа
                 })
 
@@ -723,7 +728,7 @@ async def get_wallet_history_from_tonapi(address: str, limit: int = Query(5, ge=
         for action in event.get("actions", []):
             action_type = action.get("type")
             status = action.get("status")  # "ok" или "failed"
-            simple_preview = action.get("simplePreview", {})
+            simple_preview = action.get("simple_preview") or action.get("simplePreview", {})
             action_details = {
                 "type": action_type,
                 "status": status,

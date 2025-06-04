@@ -163,8 +163,8 @@ export async function fetchTransactionHistory(address, telegramUserId) {
       // === 1) Обработка JettonSwap ===
       if (type === "JettonSwap" || action.is_swap) {
         // Берём реальные числа из бекенда:
-        const tonIn = (action.ton_in || 0).toFixed(4);
-        const amtOut = (action.amount_out || 0).toFixed(4);
+        const tonIn = Number(action.ton_in ?? 0).toFixed(4);
+        const amtOut = Number(action.amount_out ?? 0).toFixed(4);
         const sym = action.jetton_symbol || "";
         const name = action.jetton_name || "";
         const img = action.jetton_image || ""; // ${img ? `<img src="${img}" alt="${sym}" class="jetton-icon" />` : ""}
