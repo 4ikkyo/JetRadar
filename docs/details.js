@@ -164,7 +164,7 @@ export async function fetchTransactionHistory(address, telegramUserId) {
       if (type === "JettonSwap" || action.is_swap) {
         // Берём реальные числа из бекенда:
         const tonIn = (action.ton_in || 0).toFixed(4);
-        const amtOut = (action.amount_out || 0).toFixed(2);
+        const amtOut = (action.amount_out || 0).toFixed(4);
         const sym = action.jetton_symbol || "";
         const name = action.jetton_name || "";
         const img = action.jetton_image || ""; // ${img ? `<img src="${img}" alt="${sym}" class="jetton-icon" />` : ""}
@@ -194,7 +194,7 @@ export async function fetchTransactionHistory(address, telegramUserId) {
       }
       // === 3) Обработка JettonTransfer ===
       else if (type === "JettonTransfer") {
-        const amtJ = (action.amount || 0).toFixed(2);
+        const amtJ = (action.amount || 0).toFixed(4);
         const sym = action.jetton_symbol || "";
         const img = action.jetton_image || "";
         const dirEmoji = action.is_send ? "📤" : "📥";

@@ -150,6 +150,7 @@ class EventResponse(BaseModel):
     lt: int
     actions: List[ActionResponse]
 
+@router.get("/{address}/summary", response_model=WalletSummary, summary="Получить сводку кошелька")
 async def get_wallet_summary(address: str, telegram_user_id: int = Query(...)):
     """
     Возвращает:
@@ -426,7 +427,7 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                         sender = transfer.get("sender", {}).get("address")
                         recipient = transfer.get("recipient", {}).get("address")
                         jetton_info = transfer.get("jetton", {})
-                        decimals = jetton_info.get("decimals", 9)
+                        decimals = int(jetton_info.get("decimals", 9) or 9)
                         amount_val = int(transfer.get("amount", 0)) / (10 ** decimals)
                         amount_str = f"{amount_val:.2f} {jetton_info.get('symbol', 'JTN')}"
 
@@ -474,6 +475,51 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
     final_nodes = list(nodes_dict.values())
     # Опционально: убрать изолированные узлы, если они не из root_set
     # ...
+
+    if not edges_list:
+        # Если локальная база пуста, попробуем взять последние события из TonAPI
+        for addr in root_wallet_addresses:
+            try:
+                tonapi_events = await get_wallet_history_from_tonapi(addr, limit=5)
+            except Exception:
+                continue
+            for event in tonapi_events:
+                for act in event.get("actions", []):
+                    sender = None
+                    recipient = None
+                    amount_str = ""
+                    act_type = act.get("type")
+                    if act_type == "TonTransfer":
+                        sender = act.get("sender")
+                        recipient = act.get("recipient")
+                        amount = act.get("amount_ton") or 0
+                        amount_str = f"{amount:.2f} TON"
+                    elif act_type == "JettonTransfer":
+                        sender = act.get("sender")
+                        recipient = act.get("recipient")
+                        amount = act.get("amount") or 0
+                        amount_str = f"{amount:.2f} {act.get('jetton_symbol', '')}"
+                    if sender and recipient:
+                        for a in [sender, recipient]:
+                            if a not in nodes_dict:
+                                nodes_dict[a] = GraphNode(
+                                    id=a,
+                                    label=f"{a[:6]}...",
+                                    color="#97C2FC",
+                                    shape="ellipse",
+                                    meta=NodeMeta(),
+                                )
+                        nodes_dict[sender].meta.out_tx_count += 1
+                        nodes_dict[recipient].meta.in_tx_count += 1
+                        edges_list.append(
+                            GraphEdge(
+                                from_node=sender,
+                                to_node=recipient,
+                                label=amount_str,
+                                title=amount_str,
+                            )
+                        )
+        final_nodes = list(nodes_dict.values())
 
     if not final_nodes and not edges_list:
         return GraphResponse(nodes=[], edges=[],
@@ -708,7 +754,7 @@ async def get_wallet_history_from_tonapi(address: str, limit: int = Query(5, ge=
                 sender_addr = transfer.get("sender", {}).get("address")
                 recipient_addr = transfer.get("recipient", {}).get("address")
                 jetton_info = transfer.get("jetton", {})
-                decimals = jetton_info.get("decimals", 9)
+                decimals = int(jetton_info.get("decimals", 9) or 9)
                 try:
                     amount_jetton = int(transfer.get("amount", 0)) / (10 ** decimals)
                 except (ValueError, TypeError):
@@ -759,7 +805,7 @@ async def get_wallet_history_from_tonapi(address: str, limit: int = Query(5, ge=
                             a = 0.0
                         return ("TON", a, None, None)
                     elif isinstance(asset_info, dict):
-                        dec = asset_info.get("decimals", 9)
+                        dec = int(asset_info.get("decimals", 9) or 9)
                         try:
                             a = int(raw_amount_str) / (10 ** dec)
                         except (ValueError, TypeError):
@@ -803,7 +849,7 @@ async def get_wallet_history_from_tonapi(address: str, limit: int = Query(5, ge=
                 # 2) сколько джеттона пришло (amount_out в минимальных единицах):
                 jm_out = swap.get("jetton_master_out", {})
                 raw_amt_out = swap.get("amount_out", "0") or "0"
-                decimals = jm_out.get("decimals", 9)
+                decimals = int(jm_out.get("decimals", 9) or 9)
                 try:
                     jetton_amount = int(raw_amt_out) / (10 ** decimals)
                 except (ValueError, TypeError):
