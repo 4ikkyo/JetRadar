@@ -30,6 +30,29 @@ router = APIRouter()
 TONAPI_KEY = os.getenv("TONAPI_KEY")
 TONAPI_BASE_URL = "https://tonapi.io/v2"
 
+
+async def fetch_from_tonapi(url: str) -> httpx.Response:
+    """Выполняет GET-запрос к TonAPI и обрабатывает ошибки."""
+    headers = {"Authorization": f"Bearer {TONAPI_KEY}"}
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(url, headers=headers)
+            resp.raise_for_status()
+            return resp
+        except httpx.HTTPStatusError as e:
+            detail = f"TonAPI error {e.response.status_code}"
+            try:
+                data = e.response.json()
+                if "error" in data:
+                    detail += f": {data['error']}"
+                else:
+                    detail += f": {e.response.text}"
+            except Exception:
+                detail += f": {e.response.text}"
+            raise HTTPException(status_code=e.response.status_code, detail=detail)
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"Network error: {str(e)}")
+
 class WalletSummary(BaseModel):
     address: str
     alias: Optional[str] = None
@@ -174,27 +197,19 @@ async def get_wallet_summary(address: str, telegram_user_id: int = Query(...)):
     if not TONAPI_KEY:
         raise HTTPException(status_code=503, detail="TONAPI_KEY not set")
 
-    headers = {"Authorization": f"Bearer {TONAPI_KEY}"}
-    async with httpx.AsyncClient() as client:
-        try:
-            resp = await client.get(f"{TONAPI_BASE_URL}/accounts/{address}", headers=headers)
-            resp.raise_for_status()
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail="Error from TonAPI")
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=503, detail=f"Network error: {str(e)}")
+    resp = await fetch_from_tonapi(f"{TONAPI_BASE_URL}/accounts/{address}")
 
-        acc_data = resp.json()
-        # Из TonAPI получаем:
-        #   balance  (в нанотонах) → делим на 1e9
-        #   last_activity (Unix-timestamp)
-        #   is_scam     (булево)
-        # Если хотите, можно также забрать из acc_data первые сведения о транзакциях, но в этом методе нам достаточно баланса
+    acc_data = resp.json()
+    # Из TonAPI получаем:
+    #   balance  (в нанотонах) → делим на 1e9
+    #   last_activity (Unix-timestamp)
+    #   is_scam     (булево)
+    # Если хотите, можно также забрать из acc_data первые сведения о транзакциях, но в этом методе нам достаточно баланса
 
-        ton_balance_raw = acc_data.get("balance", 0) or 0
-        balance_ton = int(ton_balance_raw) / 1_000_000_000
-        last_activity_ts = acc_data.get("last_activity")  # может быть None или int
-        api_is_scam = acc_data.get("is_scam", False)
+    ton_balance_raw = acc_data.get("balance", 0) or 0
+    balance_ton = int(ton_balance_raw) / 1_000_000_000
+    last_activity_ts = acc_data.get("last_activity")  # может быть None или int
+    api_is_scam = acc_data.get("is_scam", False)
 
     # 4) Формируем и возвращаем WalletSummary
     return WalletSummary(
@@ -428,8 +443,6 @@ async def get_connection_graph_api(telegram_user_id: int = Query(...),
                                 if action.get("type") == "TonTransfer": nodes_dict[addr].meta.total_ton_in += amount
 
                         # Добавляем ребро
-                        edge_key = tuple(sorted((sender, recipient))) + (amount_str,)  # Для группировки одинаковых
-                        # Тут можно добавить логику агрегации ребер (суммировать value, объединять labels)
                         edges_list.append(GraphEdge(
                             from_node=sender,
                             to_node=recipient,
@@ -634,27 +647,8 @@ async def get_wallet_history_from_tonapi(address: str, limit: int = Query(5, ge=
     if not TONAPI_KEY:
         raise HTTPException(status_code=500, detail="TONAPI_KEY не установлен в окружении.")
 
-    headers = {"Authorization": f"Bearer {TONAPI_KEY}"}
     url = f"{TONAPI_BASE_URL}/accounts/{address}/events?limit={limit}"
-
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(url, headers=headers)
-            response.raise_for_status()
-        except httpx.HTTPStatusError as e:
-            # Попытка распарсить ошибки TonAPI
-            detail = f"TonAPI error {e.response.status_code}"
-            try:
-                err_json = e.response.json()
-                if "error" in err_json:
-                    detail += f": {err_json['error']}"
-                else:
-                    detail += f": {e.response.text}"
-            except:
-                detail += f": {e.response.text}"
-            raise HTTPException(status_code=e.response.status_code, detail=detail)
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=503, detail=f"Ошибка сети при запросе к TonAPI: {str(e)}")
+    response = await fetch_from_tonapi(url)
 
     data = response.json()
     events = data.get("events", [])
