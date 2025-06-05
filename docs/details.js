@@ -135,8 +135,10 @@ export function renderTransactionHistory() {
   if (!ui.transactionHistoryUl) return;
   ui.transactionHistoryUl.innerHTML = ''; // Очищаем перед рендерингом
 
-  const typeFilter = ui.txTypeFilter ? ui.txTypeFilter.value : 'all';
+  const normalizeType = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const typeFilter = ui.txTypeFilter ? normalizeType(ui.txTypeFilter.value) : 'all';
   const sortDir = ui.txSortSelect && ui.txSortSelect.value === 'asc' ? 'asc' : 'desc';
+  console.log('renderTransactionHistory', { typeFilter, sortDir, events: currentHistoryEvents.length });
 
   if (currentHistoryEvents.length === 0 && !ui.transactionHistoryContainer.classList.contains('loading-overlay')) {
       // Если загрузка завершена и событий нет, показываем сообщение (уже должно быть установлено fetchTransactionHistory)
@@ -153,10 +155,10 @@ export function renderTransactionHistory() {
       ...event,
       // Фильтруем actions внутри каждого event ДО сортировки event'ов
       actions: event.actions.filter(act => {
+        const actType = normalizeType(act.type);
         if (typeFilter === 'all') return true;
-        // Более гибкая проверка типа, если action.type может быть сложным
-        // Например, если тип это "JettonTransfer_specificJetton"
-        return act.type?.startsWith(typeFilter);
+        // exact match first, then fallback to prefix for backward compatibility
+        return actType === typeFilter || actType.startsWith(typeFilter);
       })
     }))
     // Убираем event'ы, у которых не осталось actions после фильтрации
@@ -200,14 +202,17 @@ export function renderTransactionHistory() {
 function formatAction(action, currentWalletAddr) {
   let html = '';
   const type = action.type || 'Unknown';
-  const isSend = action.sender?.address === currentWalletAddr; // Определяем направление относительно текущего кошелька
-  const isReceive = action.recipient?.address === currentWalletAddr;
+  const senderAddr = typeof action.sender === 'string' ? action.sender : action.sender?.address;
+  const recipientAddr = typeof action.recipient === 'string' ? action.recipient : action.recipient?.address;
+  const isSend = senderAddr === currentWalletAddr;
+  const isReceive = recipientAddr === currentWalletAddr;
 
   // Суммы и символы
   const amountTON = action.amount_ton ? parseFloat(action.amount_ton).toFixed(4) : null;
-  const amountJetton = action.amount_jetton ? parseFloat(action.amount_jetton).toFixed(4) : null; // Предполагаем, что amount_jetton это основная сумма
-  const jettonSymbol = action.jetton_master?.symbol || action.jetton_symbol || 'JET';
-  const jettonImage = action.jetton_master?.image || action.jetton_image || '';
+  const amountJettonRaw = action.amount_jetton ?? action.amount;
+  const amountJetton = amountJettonRaw != null ? parseFloat(amountJettonRaw).toFixed(4) : null;
+  const jettonSymbol = action.jetton_symbol || action.jetton_master?.symbol || 'JET';
+  const jettonImage = action.jetton_image || action.jetton_master?.image || '';
 
   const fee = action.fee_ton ? parseFloat(action.fee_ton).toFixed(5) : null; // Пример
   const comment = action.comment || action.message_body?.text || ''; // Пример
@@ -224,28 +229,28 @@ function formatAction(action, currentWalletAddr) {
   if (type.startsWith('TonTransfer')) {
     title = t('tx_type_TonTransfer');
     description = isSend
-      ? t('tx_details_ton_sent', { amount: amountTON, to: shortenAddress(action.recipient?.address || '?') })
-      : t('tx_details_ton_received', { amount: amountTON, from: shortenAddress(action.sender?.address || '?') });
+      ? t('tx_details_ton_sent', { amount: amountTON, to: shortenAddress(recipientAddr || '?') })
+      : t('tx_details_ton_received', { amount: amountTON, from: shortenAddress(senderAddr || '?') });
     if (comment) description += ` (${t('tx_comment')}: ${comment})`;
   } else if (type.startsWith('JettonTransfer')) {
     title = t('tx_type_JettonTransfer');
     description = isSend
-      ? t('tx_details_jetton_sent', { amount: amountJetton, symbol: jettonSymbol, to: shortenAddress(action.recipient?.address || '?') })
-      : t('tx_details_jetton_received', { amount: amountJetton, symbol: jettonSymbol, from: shortenAddress(action.sender?.address || '?') });
+      ? t('tx_details_jetton_sent', { amount: amountJetton, symbol: jettonSymbol, to: shortenAddress(recipientAddr || '?') })
+      : t('tx_details_jetton_received', { amount: amountJetton, symbol: jettonSymbol, from: shortenAddress(senderAddr || '?') });
      if (comment) description += ` (${t('tx_comment')}: ${comment})`;
   } else if (type.startsWith('NftTransfer')) {
     title = t('tx_type_NftTransfer');
-    const nftName = action.nft_item?.name || 'NFT';
+    const nftName = action.nft_name || action.nft_item?.name || 'NFT';
     description = isSend
-      ? t('tx_details_nft_sent', { name: nftName, to: shortenAddress(action.recipient?.address || '?') })
-      : t('tx_details_nft_received', { name: nftName, from: shortenAddress(action.sender?.address || '?') });
+      ? t('tx_details_nft_sent', { name: nftName, to: shortenAddress(recipientAddr || '?') })
+      : t('tx_details_nft_received', { name: nftName, from: shortenAddress(senderAddr || '?') });
   } else if (type.startsWith('JettonSwap')) {
     title = t('tx_type_JettonSwap');
-    const amountIn = parseFloat(action.amount_in).toFixed(4);
-    const symbolIn = action.jetton_in?.symbol || (action.ton_in ? 'TON' : '???');
-    const amountOut = parseFloat(action.amount_out).toFixed(4);
-    const symbolOut = action.jetton_out?.symbol || (action.ton_out ? 'TON' : '???');
-    description = t('tx_details_swap', {amountIn, symbolIn, amountOut, symbolOut});
+    const amountIn = action.ton_in != null ? parseFloat(action.ton_in).toFixed(4) : '0';
+    const symbolIn = 'TON';
+    const amountOut = action.amount_out != null ? parseFloat(action.amount_out).toFixed(4) : '0';
+    const symbolOut = action.jetton_symbol || 'JET';
+    description = t('tx_details_swap', { amountIn, symbolIn, amountOut, symbolOut });
     if (action.dex) description += ` via ${action.dex}`;
   } else {
     // Общий случай
@@ -286,15 +291,24 @@ export async function fetchAndRenderGraph(address, telegramUserId, isInitialLoad
   const jettonOnly = ui.filterJettonCheckbox?.checked ?? false;
   const minValueTON= parseFloat(ui.minAmountInput?.value) || 0;
 
-  // --- GET-эндпоинт с query-параметрами, telegramUserId уходит в query ---
+  console.log('apply graph filters', { incoming, outgoing, jettonOnly, minValueTON });
+  console.log('requesting /wallet/graph', {
+    target_address: address,
+    incoming,
+    outgoing,
+    jetton_only: jettonOnly,
+    min_value: minValueTON
+  });
+
   const result = await fetchAPI(
-    `/wallet/${address}/graph`,
+    `/wallet/graph`,
     'GET',
     {
+      target_address: address,
       incoming,
       outgoing,
       jetton_only: jettonOnly,
-      min_amount_ton: minValueTON
+      min_value: minValueTON
     },
     telegramUserId
   );
@@ -312,6 +326,7 @@ export async function fetchAndRenderGraph(address, telegramUserId, isInitialLoad
  */
 export function refreshGraphFiltersAndFetchData() {
     if (currentWalletAddressForDetails && currentTelegramUserIdForDetails) {
+        console.log('refreshGraphFiltersAndFetchData click');
         setLoadingState(ui.applyGraphFiltersButton, true, 'button', t('apply_filters'));
         fetchAndRenderGraph(currentWalletAddressForDetails, currentTelegramUserIdForDetails, false)
             .finally(() => {

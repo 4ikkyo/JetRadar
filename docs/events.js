@@ -99,10 +99,16 @@ export function initApp(tg) {
 
   // Фильтры истории транзакций
   if (ui.txSortSelect) {
-    ui.txSortSelect.addEventListener('change', renderTransactionHistory);
+    ui.txSortSelect.addEventListener('change', () => {
+      console.log('txSortSelect change', ui.txSortSelect.value);
+      renderTransactionHistory();
+    });
   }
   if (ui.txTypeFilter) {
-    ui.txTypeFilter.addEventListener('change', renderTransactionHistory);
+    ui.txTypeFilter.addEventListener('change', () => {
+      console.log('txTypeFilter change', ui.txTypeFilter.value);
+      renderTransactionHistory();
+    });
   }
 
   // Фильтры графа
