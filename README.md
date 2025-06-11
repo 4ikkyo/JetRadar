@@ -54,6 +54,29 @@ uvicorn api.main:app --reload
 python bot/main.py
 ```
 
+## Frontend
+
+Install Node.js dependencies and run the React frontend located in `docs/react`:
+
+```bash
+cd docs/react
+npm install
+```
+
+Start the development server with:
+
+```bash
+npm run dev
+```
+
+Or build the production bundle:
+
+```bash
+npm run build
+```
+
+The compiled site will be placed in `docs/react/dist`.
+
 ---
 
 ## ⚙️ Environment Variables
