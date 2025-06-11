@@ -8,6 +8,7 @@ __pycache__/
 venv/
 
 data/
+!docs/react/src/data/
 
 # Logs
 logs
