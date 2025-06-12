@@ -4,17 +4,17 @@ import { Icons } from '../lib/icons';
 import { cx } from '../lib/classNameHelper';
 
 const BottomNav = () => {
-    const { activeSection, navigateTo, notifications } = useContext(AppContext);
+    const { activeSection, navigateTo, notifications, t } = useContext(AppContext);
     const navItems = [
-        { id: 'dashboard', label: 'Главная', icon: Icons.dashboard },
-        { id: 'graph', label: 'Графы', icon: Icons.graphs },
-        { id: 'analytics', label: 'Аналитика', icon: Icons.analytics },
-        { id: 'notifications', label: 'Уведомления', icon: Icons.notifications },
-        { id: 'settings', label: 'Настройки', icon: Icons.settings },
+        { id: 'dashboard', label: t('dashboard'), icon: Icons.dashboard },
+        { id: 'graph', label: t('graph'), icon: Icons.graphs },
+        { id: 'analytics', label: t('analyticsTitle'), icon: Icons.analytics },
+        { id: 'notifications', label: t('notificationsTitle'), icon: Icons.notifications },
+        { id: 'settings', label: t('settingsTitle'), icon: Icons.settings },
     ];
 
     return (
-        <footer className="bg-white p-3 shadow-md border-t border-gray-200 sticky bottom-0 z-40">
+        <footer className="bg-white dark:bg-gray-800 p-3 shadow-md border-t border-gray-200 dark:border-gray-700 sticky bottom-0 z-40">
             <nav className="flex justify-around text-xs">
                 {navItems.map(item => (
                     <button

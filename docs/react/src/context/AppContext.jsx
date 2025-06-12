@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext } from 'react';
 import { mockWallets, mockTransactionsData, mockNotifications } from '../data/mockData';
+import { translate } from '../lib/i18n';
 
 export const AppContext = createContext();
 
@@ -13,6 +14,8 @@ export const AppProvider = ({ children }) => {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [walletToDelete, setWalletToDelete] = useState(null);
     const [message, setMessage] = useState('');
+    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+    const [language, setLanguage] = useState(() => localStorage.getItem('lang') || 'ru');
 
     useEffect(() => {
         if (message) {
@@ -20,6 +23,16 @@ export const AppProvider = ({ children }) => {
             return () => clearTimeout(timer);
         }
     }, [message]);
+
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    useEffect(() => {
+        document.documentElement.lang = language;
+        localStorage.setItem('lang', language);
+    }, [language]);
 
     const showMessage = (msg) => setMessage(msg);
 
@@ -106,12 +119,18 @@ export const AppProvider = ({ children }) => {
         }
     };
 
+    const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    const changeLanguage = (lang) => setLanguage(lang);
+    const t = (key) => translate(language, key);
+
     const value = {
         wallets, transactions, activeSection, selectedWallet, isAddModalOpen,
         isDeleteModalOpen, walletToDelete, navigateTo, selectWallet, openAddWalletModal,
         closeAddWalletModal, addWallet, openDeleteWalletModal, closeDeleteWalletModal,
         deleteWallet, showMessage, notifications, addNotification, clearNotifications,
+        theme, toggleTheme, language, changeLanguage, t,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
+

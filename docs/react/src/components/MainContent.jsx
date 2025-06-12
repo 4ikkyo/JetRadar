@@ -10,12 +10,13 @@ import NotificationsSection from '../sections/Notifications';
 import SettingsSection from '../sections/Settings';
 
 
+const SECTION_ORDER = ['dashboard', 'graph', 'analytics', 'notifications', 'settings'];
+
 const MainContent = ({ setGraphTooltipContent, setGraphTooltipPosition, setShowGraphTooltip }) => {
     const { activeSection, navigateTo } = useContext(AppContext);
 
     // Swipe navigation logic
     const touchStartX = useRef(null);
-    const sectionOrder = ['dashboard', 'graph', 'analytics', 'notifications', 'settings'];
 
     const handleTouchStart = useCallback((e) => {
         if (e.target.closest('.modal-backdrop') || e.target.closest('.graph-node')) {
@@ -32,21 +33,21 @@ const MainContent = ({ setGraphTooltipContent, setGraphTooltipPosition, setShowG
         const SWIPE_THRESHOLD = 50;
 
         if (Math.abs(diff) > SWIPE_THRESHOLD) {
-            let currentIndex = sectionOrder.indexOf(activeSection);
+            let currentIndex = SECTION_ORDER.indexOf(activeSection);
             let nextIndex = currentIndex;
 
             if (diff > 0 && currentIndex > 0) { // Swipe right
                 nextIndex = currentIndex - 1;
-            } else if (diff < 0 && currentIndex < sectionOrder.length - 1) { // Swipe left
+            } else if (diff < 0 && currentIndex < SECTION_ORDER.length - 1) { // Swipe left
                 nextIndex = currentIndex + 1;
             }
 
             if (nextIndex !== currentIndex) {
-                navigateTo(sectionOrder[nextIndex]);
+                navigateTo(SECTION_ORDER[nextIndex]);
             }
         }
         touchStartX.current = null;
-    }, [activeSection, navigateTo, sectionOrder]);
+    }, [activeSection, navigateTo]);
 
     useEffect(() => {
         document.addEventListener('touchstart', handleTouchStart, { passive: true });

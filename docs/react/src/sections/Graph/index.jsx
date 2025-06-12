@@ -8,7 +8,7 @@ import { Icons } from '../../lib/icons';
 import { cx } from '../../lib/classNameHelper';
 
 const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip }) => {
-    const { wallets, transactions, selectWallet, showMessage } = useContext(AppContext);
+    const { wallets, transactions, selectWallet, showMessage, t } = useContext(AppContext);
     const [graphData, setGraphData] = useState(null);
     const [selectedWalletIds, setSelectedWalletIds] = useState([]);
     const [depth, setDepth] = useState(1);
@@ -92,7 +92,6 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                                 if (!nodesMap.has(sourceWallet.id)) nodesMap.set(sourceWallet.id, { ...sourceWallet });
                                 if (!nodesMap.has(targetWallet.id)) nodesMap.set(targetWallet.id, { ...targetWallet });
 
-                                const linkIdentifier = [sourceWallet.id, targetWallet.id].sort().join('-');
                                 links.add(JSON.stringify({ source: sourceWallet.id, target: targetWallet.id, value: parseFloat(tx.amount) }));
                                 
                                 if (d < depth - 1) {
@@ -122,16 +121,16 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
 
     return (
         <Card className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-800">Граф Связей</h2>
+            <h2 className="text-lg font-semibold text-gray-800">{t('graphTitle')}</h2>
 
             <div className="p-3 bg-gray-50 rounded-lg space-y-4">
-                <h3 className="text-md font-semibold text-gray-800">1. Выбор Кошельков</h3>
+                <h3 className="text-md font-semibold text-gray-800">1. {t('walletSelection')}</h3>
                 <div className="flex justify-between items-center mb-3">
-                    <Button variant="secondary" className="text-xs" onClick={handleSelectAll}>Выбрать все</Button>
-                    <Button variant="secondary" className="text-xs" onClick={handleDeselectAll}>Снять все</Button>
+                    <Button variant="secondary" className="text-xs" onClick={handleSelectAll}>{t('selectAll')}</Button>
+                    <Button variant="secondary" className="text-xs" onClick={handleDeselectAll}>{t('deselectAll')}</Button>
                     <Select value={walletSelectionSort} onChange={(e) => setWalletSelectionSort(e.target.value)} className="ml-2">
-                        <option value="name">Сортировать по Имени</option>
-                        <option value="balance">Сортировать по Балансу (TON)</option>
+                        <option value="name">{t('sortByName')}</option>
+                        <option value="balance">{t('sortByBalance')}</option>
                     </Select>
                 </div>
                 <div className="flex space-x-2 mb-4 text-sm overflow-x-auto pb-2">
@@ -158,33 +157,33 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
             </div>
 
             <div className="p-3 bg-gray-50 rounded-lg space-y-2">
-                <h3 className="text-md font-semibold text-gray-800">2. Настройки графа</h3>
+                <h3 className="text-md font-semibold text-gray-800">2. {t('graphSettings')}</h3>
                 <Select value={depth} onChange={(e) => setDepth(Number(e.target.value))}>
-                    <option value="1">Глубина: 1 хоп</option>
-                    <option value="2">Глубина: 2 хопа</option>
-                    <option value="3">Глубина: 3 хопа</option>
+                    <option value="1">{t('depth1')}</option>
+                    <option value="2">{t('depth2')}</option>
+                    <option value="3">{t('depth3')}</option>
                 </Select>
                 <div className="flex space-x-2 mt-3 text-sm">
-                    <button onClick={() => setGraphFilterType('all')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>Все Кошельки</button>
-                    <button onClick={() => setGraphFilterType('TON')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'TON' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>Только TON</button>
-                    <button onClick={() => setGraphFilterType('Jetton')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'Jetton' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>Только Jetton</button>
+                    <button onClick={() => setGraphFilterType('all')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('allWallets')}</button>
+                    <button onClick={() => setGraphFilterType('TON')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'TON' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('onlyTon')}</button>
+                    <button onClick={() => setGraphFilterType('Jetton')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'Jetton' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('onlyJetton')}</button>
                 </div>
             </div>
 
             <Button onClick={buildGraph} className="w-full" disabled={isLoading || selectedWalletIds.length === 0}>
-                {isLoading ? <>{Icons.spinner} <span>Построение...</span></> : 'Построить Граф'}
+                {isLoading ? <>{Icons.spinner} <span>{t('dataLoading')}</span></> : t('buildGraph')}
             </Button>
 
             <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                <h4 className="font-semibold mb-2">Легенда Графа:</h4>
+                <h4 className="font-semibold mb-2">{t('legendTitle')}</h4>
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center">
                         <span className="inline-block w-3 h-3 rounded-full bg-indigo-600 mr-2"></span>
-                        <span>Кошелек TON</span>
+                        <span>{t('tonWallet')}</span>
                     </div>
                     <div className="flex items-center">
                         <span className="inline-block w-3 h-3 rounded-full bg-amber-500 mr-2"></span>
-                        <span>Кошелек Jetton</span>
+                        <span>{t('jettonWallet')}</span>
                     </div>
                 </div>
             </div>
@@ -199,7 +198,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                 />
             ) : (
                 <div className="w-full h-96 bg-gray-100 rounded-lg border border-dashed border-gray-300 flex items-center justify-center">
-                    {isLoading ? <>{Icons.spinner} <span className="ml-2 text-gray-500">Загрузка данных...</span></> : <p className="text-gray-500 text-center p-4">Выберите кошельки и настройте параметры для построения графа.</p>}
+                    {isLoading ? <>{Icons.spinner} <span className="ml-2 text-gray-500">{t('dataLoading')}</span></> : <p className="text-gray-500 text-center p-4">{t('graphHint')}</p>}
                 </div>
             )}
         </Card>

@@ -11,7 +11,7 @@ const WalletInfo = () => {
         try {
             await navigator.clipboard.writeText(selectedWallet.address);
             showMessage('Адрес скопирован!');
-        } catch (err) {
+        } catch {
             showMessage('Не удалось скопировать адрес.');
         }
     };

@@ -1,11 +1,9 @@
-import { useState, useContext } from 'react';
-import { AppContext } from '../../context/AppContext';
+import { useState } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { Icons } from '../../lib/icons';
 
 const AIAnalysis = () => {
-    const { showMessage, selectedWallet, transactions } = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
     const [analysis, setAnalysis] = useState('');
     const [error, setError] = useState('');
@@ -15,12 +13,7 @@ const AIAnalysis = () => {
         setAnalysis('');
         setError('');
 
-        const walletTransactions = selectedWallet ? (transactions[selectedWallet.address] || []) : [];
-        const transactionsText = walletTransactions.map(tx =>
-            `${tx.type === 'in' ? 'Получено' : 'Отправлено'} ${tx.amount} ${tx.token} ${tx.type === 'in' ? 'от' : 'на адрес'} ${tx.counterparty} (${tx.date})`
-        ).join('\n');
-
-        // ... (Здесь могла бы быть логика запроса к AI)
+        // Здесь могла бы быть логика запроса к AI
 
         try {
             await new Promise(resolve => setTimeout(resolve, 1500));
