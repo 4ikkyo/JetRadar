@@ -8,7 +8,6 @@ const BottomNav = () => {
     const navItems = [
         { id: 'dashboard', label: t('dashboard'), icon: Icons.dashboard },
         { id: 'graph', label: t('graph'), icon: Icons.graphs },
-        { id: 'analytics', label: t('analyticsTitle'), icon: Icons.analytics },
         { id: 'notifications', label: t('notificationsTitle'), icon: Icons.notifications },
         { id: 'settings', label: t('settingsTitle'), icon: Icons.settings },
     ];

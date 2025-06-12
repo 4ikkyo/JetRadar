@@ -56,7 +56,7 @@ const Dashboard = () => {
                             }
                         };
                         return (
-                            <button key={group} onClick={toggleGroup} className={cx('px-4 py-1.5 rounded-full flex-shrink-0 transition-colors', isActive ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700')}>
+                            <button key={group} onClick={toggleGroup} className={cx('px-4 py-1.5 rounded-full flex-shrink-0 transition-colors', isActive ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-200')}>
                                 {group === t('filterAll') ? t('filterAll') : group}
                             </button>
                         );

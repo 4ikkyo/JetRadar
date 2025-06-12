@@ -8,7 +8,7 @@ const Button = ({ children, onClick, variant = 'primary', className = '', disabl
     // Variant specific styles for Liquid Glass design
     const variants = {
         primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-        secondary: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500',
+        secondary: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 dark:bg-indigo-700 dark:text-indigo-100 dark:hover:bg-indigo-600',
         danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
     };
     

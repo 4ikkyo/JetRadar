@@ -39,13 +39,13 @@ const TransactionSection = () => {
         <Card>
             <h3 className="text-md font-semibold text-gray-800 mb-3">{t('recentTransactions')}</h3>
             <div className="flex space-x-2 mb-3 text-sm">
-                <button onClick={() => setTxFilter('all')} className={cx('px-3 py-1 rounded-full', txFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('filterAll')}</button>
-                <button onClick={() => setTxFilter('in')} className={cx('px-3 py-1 rounded-full', txFilter === 'in' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('filterIn')}</button>
-                <button onClick={() => setTxFilter('out')} className={cx('px-3 py-1 rounded-full', txFilter === 'out' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('filterOut')}</button>
+                <button onClick={() => setTxFilter('all')} className={cx('px-3 py-1 rounded-full', txFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-200')}>{t('filterAll')}</button>
+                <button onClick={() => setTxFilter('in')} className={cx('px-3 py-1 rounded-full', txFilter === 'in' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-200')}>{t('filterIn')}</button>
+                <button onClick={() => setTxFilter('out')} className={cx('px-3 py-1 rounded-full', txFilter === 'out' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-200')}>{t('filterOut')}</button>
             </div>
             <ul className="space-y-2">
                 {filteredTransactions.length > 0 ? filteredTransactions.map(tx => (
-                    <li key={tx.hash} className="bg-gray-50 p-3 rounded-lg text-sm shadow-sm space-y-2">
+                    <li key={tx.hash} className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-sm shadow-sm space-y-2">
                         <div className="flex justify-between items-start">
                             <div className="flex items-center">
                                 {tx.type === 'in' ? Icons.txIn : Icons.txOut}

@@ -18,15 +18,16 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
     const [depth, setDepth] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [graphFilterType, setGraphFilterType] = useState('all');
-    const [walletSelectionFilter, setWalletSelectionFilter] = useState('Все');
+    const filterAllLabel = t('filterAll');
+    const [walletSelectionFilter, setWalletSelectionFilter] = useState(filterAllLabel);
     const [walletSelectionSort, setWalletSelectionSort] = useState('name');
 
-    const availableGroups = ['Все', 'TON', 'Jetton', ...new Set(wallets.flatMap(w => w.groups).filter(Boolean))].filter(Boolean);
+    const availableGroups = [filterAllLabel, 'TON', 'Jetton', ...new Set(wallets.flatMap(w => w.groups).filter(Boolean))].filter(Boolean);
 
     const getFilteredAndSortedWalletsForSelection = useCallback(() => {
         let currentWallets = [...wallets];
 
-        if (walletSelectionFilter !== 'Все') {
+        if (walletSelectionFilter !== filterAllLabel) {
             if (walletSelectionFilter === 'TON') {
                 currentWallets = currentWallets.filter(w => w.tokenType === 'TON');
             } else if (walletSelectionFilter === 'Jetton') {
@@ -42,7 +43,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
             currentWallets.sort((a, b) => b.tonValue - a.tonValue);
         }
         return currentWallets;
-    }, [wallets, walletSelectionFilter, walletSelectionSort]);
+    }, [wallets, walletSelectionFilter, walletSelectionSort, filterAllLabel]);
 
     const handleSelectAll = () => {
         setSelectedWalletIds(getFilteredAndSortedWalletsForSelection().map(w => w.id));

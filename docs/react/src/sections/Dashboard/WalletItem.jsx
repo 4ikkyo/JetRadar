@@ -11,7 +11,7 @@ const WalletItem = ({ wallet }) => {
     const { selectWallet } = useContext(AppContext);
 
     return (
-        <li className="bg-gray-50 p-3 rounded-lg flex justify-between items-center cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => selectWallet(wallet)}>
+                <li className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors" onClick={() => selectWallet(wallet)}>
             <div className="flex items-center overflow-hidden">
                 <StatusIndicator status={wallet.status} />
                 <div className="overflow-hidden">
@@ -23,7 +23,7 @@ const WalletItem = ({ wallet }) => {
                 <p className={cx("font-semibold", wallet.tokenType === 'TON' ? 'text-green-600' : 'text-blue-600')}>{wallet.balance}</p>
                 <div className="flex justify-end space-x-1 mt-1">
                     {(wallet.groups && wallet.groups.length > 0) ? wallet.groups.slice(0, 2).map(g => (
-                        <span key={g} className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded-full">{g}</span>
+                        <span key={g} className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded-full dark:bg-indigo-700 dark:text-indigo-100">{g}</span>
                     )) : <span className="text-xs text-gray-400"></span>}
                 </div>
             </div>

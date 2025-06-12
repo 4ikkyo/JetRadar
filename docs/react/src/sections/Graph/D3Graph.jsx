@@ -72,8 +72,7 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
         .attr('x', 0)
         .attr('y', 15)
         .attr("class", "node-text")
-        .attr("stroke", "none")
-        .attr("fill", "#F00FFF");
+        .attr("stroke", "none");
 
         // Zoom and Pan behavior
         const zoom = d3.zoom()

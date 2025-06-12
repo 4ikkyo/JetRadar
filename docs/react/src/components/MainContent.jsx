@@ -5,12 +5,11 @@ import { AppContext } from '../context/AppContext';
 import Dashboard from '../sections/Dashboard';
 import WalletDetails from '../sections/WalletDetails';
 import GraphSection from '../sections/Graph';
-import AnalyticsSection from '../sections/Analytics';
 import NotificationsSection from '../sections/Notifications';
 import SettingsSection from '../sections/Settings';
 
 
-const SECTION_ORDER = ['dashboard', 'graph', 'analytics', 'notifications', 'settings'];
+const SECTION_ORDER = ['dashboard', 'graph', 'notifications', 'settings'];
 
 const MainContent = ({ setGraphTooltipContent, setGraphTooltipPosition, setShowGraphTooltip }) => {
     const { activeSection, navigateTo, t } = useContext(AppContext);
@@ -68,7 +67,6 @@ const MainContent = ({ setGraphTooltipContent, setGraphTooltipPosition, setShowG
             setTooltipPosition={setGraphTooltipPosition}
             setShowTooltip={setShowGraphTooltip}
         />,
-        analytics: <AnalyticsSection />,
         notifications: <NotificationsSection />,
         settings: <SettingsSection title={t('settingsTitle')} />,
     };
