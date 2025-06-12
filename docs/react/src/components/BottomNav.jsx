@@ -21,7 +21,7 @@ const BottomNav = () => {
                         key={item.id}
                         onClick={() => navigateTo(item.id)}
                         className={cx(
-                            'flex flex-col items-center w-16 transition-colors duration-200 relative',
+                            'flex flex-col items-center w-16 transition-colors transition-transform duration-200 relative hover:scale-105 active:scale-95',
                             activeSection === item.id ? 'text-indigo-600 font-medium' : 'text-gray-500 hover:text-indigo-600'
                         )}
                     >

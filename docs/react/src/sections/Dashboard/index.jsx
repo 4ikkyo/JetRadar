@@ -9,13 +9,13 @@ import { cx } from '../../lib/classNameHelper';
 const Dashboard = () => {
     const { wallets, openAddWalletModal, showMessage, t } = useContext(AppContext);
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeGroup, setActiveGroup] = useState('Все');
+    const [activeGroup, setActiveGroup] = useState(t('filterAll'));
 
-    const groups = ['Все', ...new Set(wallets.flatMap(w => w.groups || []))].filter(Boolean);
+    const groups = [t('filterAll'), ...new Set(wallets.flatMap(w => w.groups || []))].filter(Boolean);
 
     const filteredWallets = wallets.filter(wallet =>
         (wallet.name.toLowerCase().includes(searchTerm.toLowerCase()) || wallet.address.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (activeGroup === 'Все' || (wallet.groups && wallet.groups.includes(activeGroup)))
+        (activeGroup === t('filterAll') || (wallet.groups && wallet.groups.includes(activeGroup)))
     );
 
     const totalTonValue = wallets.reduce((sum, wallet) => sum + wallet.tonValue, 0);
@@ -28,7 +28,7 @@ const Dashboard = () => {
                     <div className="bg-green-50 p-3 rounded-lg"><p className="text-sm text-gray-600">{t('valueTon')}</p><p className="text-2xl font-bold text-green-700">{totalTonValue.toFixed(2)}</p></div>
                 </div>
                 <div className="flex space-x-2">
-                    <Button variant="primary" className="flex-1 py-2" onClick={() => showMessage('Обновление...')}>{Icons.refresh} <span>{t('refreshAll')}</span></Button>
+                    <Button variant="primary" className="flex-1 py-2" onClick={() => showMessage(t('updating'))}>{Icons.refresh} <span>{t('refreshAll')}</span></Button>
                     <Button variant="secondary" className="flex-1 py-2" onClick={openAddWalletModal}>{Icons.addSmall} <span>{t('add')}</span></Button>
                 </div>
             </Card>
@@ -42,7 +42,7 @@ const Dashboard = () => {
                 <div className="flex space-x-2 mb-4 text-sm overflow-x-auto pb-2">
                     {groups.map(group => (
                         <button key={group} onClick={() => setActiveGroup(group)} className={cx('px-4 py-1.5 rounded-full flex-shrink-0 transition-colors', activeGroup === group ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700')}>
-                            {group}
+                            {group === t('filterAll') ? t('filterAll') : group}
                         </button>
                     ))}
                 </div>

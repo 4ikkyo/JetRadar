@@ -9,6 +9,10 @@ import { cx } from '../../lib/classNameHelper';
 
 const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip }) => {
     const { wallets, transactions, selectWallet, showMessage, t } = useContext(AppContext);
+
+    const handleNodeClick = useCallback((node) => {
+        selectWallet(node);
+    }, [selectWallet]);
     const [graphData, setGraphData] = useState(null);
     const [selectedWalletIds, setSelectedWalletIds] = useState([]);
     const [depth, setDepth] = useState(1);
@@ -56,7 +60,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
 
     const buildGraph = () => {
         if (selectedWalletIds.length === 0) {
-            showMessage('Выберите хотя бы один кошелек для построения графа');
+            showMessage(t('selectWalletsForGraph'));
             setGraphData(null);
             return;
         }
@@ -112,9 +116,9 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
             setGraphData({ nodes: finalNodes, links: finalLinks });
             setIsLoading(false);
             if (finalNodes.length > 0) {
-                showMessage('Граф построен!');
+                showMessage(t('graphBuilt'));
             } else {
-                showMessage('Не найдено связей по заданным критериям.');
+                showMessage(t('noConnectionsFound'));
             }
         }, 1000);
     };
@@ -191,7 +195,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
             {(graphData && !isLoading) ? (
                 <D3Graph
                     graphData={graphData}
-                    onNodeClick={selectWallet}
+                    onNodeClick={handleNodeClick}
                     setTooltipContent={setTooltipContent}
                     setTooltipPosition={setTooltipPosition}
                     setShowTooltip={setShowTooltip}

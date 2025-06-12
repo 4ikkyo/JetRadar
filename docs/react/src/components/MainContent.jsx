@@ -13,7 +13,7 @@ import SettingsSection from '../sections/Settings';
 const SECTION_ORDER = ['dashboard', 'graph', 'analytics', 'notifications', 'settings'];
 
 const MainContent = ({ setGraphTooltipContent, setGraphTooltipPosition, setShowGraphTooltip }) => {
-    const { activeSection, navigateTo } = useContext(AppContext);
+    const { activeSection, navigateTo, t } = useContext(AppContext);
 
     // Swipe navigation logic
     const touchStartX = useRef(null);
@@ -70,7 +70,7 @@ const MainContent = ({ setGraphTooltipContent, setGraphTooltipPosition, setShowG
         />,
         analytics: <AnalyticsSection />,
         notifications: <NotificationsSection />,
-        settings: <SettingsSection title="Настройки" />,
+        settings: <SettingsSection title={t('settingsTitle')} />,
     };
 
     return (<main className="flex-grow p-2 sm:p-4">{sections[activeSection] || <Dashboard />}</main>);

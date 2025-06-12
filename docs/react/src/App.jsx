@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppProvider } from './context/AppContext';
+import { AppProvider } from './context/AppProvider';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
 import BottomNav from './components/BottomNav';

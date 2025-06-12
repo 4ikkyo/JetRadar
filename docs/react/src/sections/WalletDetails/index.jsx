@@ -9,13 +9,13 @@ import TransactionSection from "./TransactionSection";
 
 
 const WalletDetails = () => {
-    const { selectedWallet, navigateTo } = useContext(AppContext);
+    const { selectedWallet, navigateTo, t } = useContext(AppContext);
 
     if (!selectedWallet) {
         return (
             <div className="text-center p-8">
-                <p>Кошелек не выбран.</p>
-                <Button onClick={() => navigateTo('dashboard')} className="mt-4">Вернуться к списку</Button>
+                <p>{t('walletNotSelected')}</p>
+                <Button onClick={() => navigateTo('dashboard')} className="mt-4">{t('backToList')}</Button>
             </div>
         );
     }
@@ -24,7 +24,7 @@ const WalletDetails = () => {
         <div className="space-y-4">
             <Card>
                 <button onClick={() => navigateTo('dashboard')} className="text-indigo-600 mb-4 flex items-center space-x-1 font-medium -ml-1">
-                    {Icons.back}<span>Назад</span>
+                    {Icons.back}<span>{t('back')}</span>
                 </button>
                 <WalletInfo />
             </Card>

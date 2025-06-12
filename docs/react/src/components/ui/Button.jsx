@@ -3,7 +3,7 @@ import { Icons } from '../../lib/icons';
 
 const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false, loading = false, icon }) => {
     // Base styles applied to all buttons
-    const baseStyles = 'px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group';
+    const baseStyles = 'px-4 py-2 rounded-lg font-semibold transition-colors transition-transform duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group hover:scale-105 active:scale-95';
 
     // Variant specific styles for Liquid Glass design
     const variants = {

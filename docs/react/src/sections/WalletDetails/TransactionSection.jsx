@@ -5,7 +5,7 @@ import { Icons } from '../../lib/icons';
 import { cx } from '../../lib/classNameHelper';
 
 const TransactionSection = () => {
-    const { selectedWallet, transactions, selectWallet } = useContext(AppContext);
+    const { selectedWallet, transactions, selectWallet, t } = useContext(AppContext);
     const [txFilter, setTxFilter] = useState('all');
     const [explanation, setExplanation] = useState(null);
     const [explanationLoading, setExplanationLoading] = useState(false);
@@ -18,14 +18,14 @@ const TransactionSection = () => {
 
     const explainTransaction = async (tx) => {
         setExplanationLoading(true);
-        setExplanation({ hash: tx.hash, text: 'Получаем объяснение...' });
+        setExplanation({ hash: tx.hash, text: t('gettingExplanation') });
         setExplanationError('');
 
         try {
             await new Promise(r => setTimeout(r, 1500));
-            setExplanation({ hash: tx.hash, text: tx.description || 'Объяснение для этой транзакции не найдено.' });
+            setExplanation({ hash: tx.hash, text: tx.description || t('explanationNotFound') });
         } catch (err) {
-            setExplanationError(`Ошибка: ${err.message || 'Не удалось получить объяснение.'}`);
+            setExplanationError(`${t('error')}: ${err.message || t('explanationFailed')}`);
         } finally {
             setExplanationLoading(false);
         }
@@ -37,11 +37,11 @@ const TransactionSection = () => {
 
     return (
         <Card>
-            <h3 className="text-md font-semibold text-gray-800 mb-3">Последние Транзакции</h3>
+            <h3 className="text-md font-semibold text-gray-800 mb-3">{t('recentTransactions')}</h3>
             <div className="flex space-x-2 mb-3 text-sm">
-                <button onClick={() => setTxFilter('all')} className={cx('px-3 py-1 rounded-full', txFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>Все</button>
-                <button onClick={() => setTxFilter('in')} className={cx('px-3 py-1 rounded-full', txFilter === 'in' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>Входящие</button>
-                <button onClick={() => setTxFilter('out')} className={cx('px-3 py-1 rounded-full', txFilter === 'out' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>Исходящие</button>
+                <button onClick={() => setTxFilter('all')} className={cx('px-3 py-1 rounded-full', txFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('filterAll')}</button>
+                <button onClick={() => setTxFilter('in')} className={cx('px-3 py-1 rounded-full', txFilter === 'in' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('filterIn')}</button>
+                <button onClick={() => setTxFilter('out')} className={cx('px-3 py-1 rounded-full', txFilter === 'out' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('filterOut')}</button>
             </div>
             <ul className="space-y-2">
                 {filteredTransactions.length > 0 ? filteredTransactions.map(tx => (
@@ -54,7 +54,7 @@ const TransactionSection = () => {
                                         {tx.type === 'in' ? '+' : '-'}{tx.amount} {tx.token}
                                     </p>
                                     <p className="text-gray-500">
-                                        {tx.type === 'in' ? 'От' : 'Кому'}:
+                                        {tx.type === 'in' ? t('fromLabel') : t('toLabel')}:
                                         <button onClick={() => handleCounterpartyClick(tx.counterparty)} className="text-indigo-600 hover:underline ml-1">
                                             {tx.counterparty.substring(0, 10)}...
                                         </button>
@@ -63,17 +63,17 @@ const TransactionSection = () => {
                             </div>
                             <div className="text-right flex-shrink-0">
                                 <span className="text-gray-500 text-xs">{tx.date}</span>
-                                <button onClick={() => explainTransaction(tx)} className="text-indigo-500 hover:text-indigo-700 text-xs font-bold mt-1 block">Объяснить ✨</button>
+                                <button onClick={() => explainTransaction(tx)} className="text-indigo-500 hover:text-indigo-700 text-xs font-bold mt-1 block">{t('explain')}</button>
                             </div>
                         </div>
                         {(explanation?.hash === tx.hash && explanation.text) && (
                             <div className="text-indigo-800 text-xs bg-indigo-100 p-2 rounded-md border border-indigo-200">
-                                {explanationLoading ? (<div className="text-center text-gray-500 flex items-center justify-center space-x-1"><Icons.spinner className="w-3 h-3"/> <span>Загрузка...</span></div>) : explanation.text}
+                                {explanationLoading ? (<div className="text-center text-gray-500 flex items-center justify-center space-x-1"><Icons.spinner className="w-3 h-3"/> <span>{t('loading')}</span></div>) : explanation.text}
                                 {explanationError && <div className="text-red-600">{explanationError}</div>}
                             </div>
                         )}
                     </li>
-                )) : <li className="text-center text-gray-500 py-2">Транзакций не найдено.</li>}
+                )) : <li className="text-center text-gray-500 py-2">{t('noTransactions')}</li>}
             </ul>
         </Card>
     );

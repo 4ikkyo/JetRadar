@@ -1,8 +1,7 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect } from 'react';
+import { AppContext } from './AppContext';
 import { mockWallets, mockTransactionsData, mockNotifications } from '../data/mockData';
 import { translate } from '../lib/i18n';
-
-export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
     const [wallets, setWallets] = useState(mockWallets);
@@ -41,14 +40,14 @@ export const AppProvider = ({ children }) => {
             id: Date.now(),
             type,
             text,
-            time: 'только что',
+            time: t('justNow'),
         };
         setNotifications(prev => [newNotif, ...prev]);
     };
 
     const clearNotifications = () => {
         setNotifications([]);
-        showMessage("Уведомления очищены");
+        showMessage(t('notificationsCleared'));
     };
 
     const navigateTo = (section) => {
@@ -65,7 +64,7 @@ export const AppProvider = ({ children }) => {
             navigateTo('walletDetails');
             return true;
         }
-        showMessage(`Кошелек ${wallet.address.substring(0,10)}... не найден в вашем Watchlist.`);
+        showMessage(t('walletNotFound').replace('{address}', wallet.address.substring(0,10)));
         return false;
     };
 
@@ -91,11 +90,11 @@ export const AppProvider = ({ children }) => {
                  { type: 'out', amount: (Math.random() * 10).toFixed(2), token: newWallet.tokenType, counterparty: 'Новый Получатель', date: new Date().toLocaleString('ru-RU'), hash: 'TX_NEW_OUT_' + Math.random().toString(36).substring(7), description: 'Имитация исходящей транзакции для нового кошелька.' }
             ]
         }));
-        addNotification('success', `Кошелек "${newWallet.name}" добавлен.`);
+        addNotification('success', t('walletAddedNotif').replace('{name}', newWallet.name));
         closeAddWalletModal();
-        showMessage("Кошелек успешно добавлен!");
+        showMessage(t('walletAddedMessage'));
     };
-    
+
     const openDeleteWalletModal = (wallet) => {
         setWalletToDelete(wallet);
         setDeleteModalOpen(true);
@@ -105,17 +104,17 @@ export const AppProvider = ({ children }) => {
         setWalletToDelete(null);
         setDeleteModalOpen(false);
     };
-    
+
     const deleteWallet = () => {
         if(walletToDelete) {
             setWallets(prev => prev.filter(w => w.id !== walletToDelete.id));
             setTransactions(prev => {
                 const newTrans = {...prev}; delete newTrans[walletToDelete.id]; return newTrans;
             });
-            addNotification('warning', `Кошелек "${walletToDelete.name}" удален.`);
+            addNotification('warning', t('walletDeletedNotif').replace('{name}', walletToDelete.name));
             navigateTo('dashboard');
             closeDeleteWalletModal();
-            showMessage("Кошелек удален.");
+            showMessage(t('walletDeletedMessage'));
         }
     };
 

@@ -4,14 +4,14 @@ import Modal from './ui/Modal';
 import Button from './ui/Button';
 
 const DeleteWalletModal = () => {
-    const { isDeleteModalOpen, closeDeleteWalletModal, deleteWallet, walletToDelete } = useContext(AppContext);
+    const { isDeleteModalOpen, closeDeleteWalletModal, deleteWallet, walletToDelete, t } = useContext(AppContext);
     
     return (
-        <Modal isOpen={isDeleteModalOpen} onClose={closeDeleteWalletModal} title="Подтвердить Удаление">
-            <p className="text-gray-700 mb-6">Вы уверены, что хотите удалить кошелек "<span className="font-medium">{walletToDelete?.name}</span>"?</p>
+        <Modal isOpen={isDeleteModalOpen} onClose={closeDeleteWalletModal} title={t('confirmDeleteTitle')}>
+            <p className="text-gray-700 mb-6">{t('confirmDeleteMessage').replace('{name}', walletToDelete?.name || '')}</p>
             <div className="flex justify-end space-x-2">
-                <Button variant="secondary" onClick={closeDeleteWalletModal}>Отмена</Button>
-                <Button variant="danger" onClick={deleteWallet}>Удалить</Button>
+                <Button variant="secondary" onClick={closeDeleteWalletModal}>{t('cancel')}</Button>
+                <Button variant="danger" onClick={deleteWallet}>{t('delete')}</Button>
             </div>
         </Modal>
     );

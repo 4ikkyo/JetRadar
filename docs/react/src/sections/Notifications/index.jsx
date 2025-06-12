@@ -12,13 +12,13 @@ const NotifIcon = ({type}) => {
 }
 
 const NotificationsSection = () => {
-    const { notifications, clearNotifications } = useContext(AppContext);
+    const { notifications, clearNotifications, t } = useContext(AppContext);
 
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Уведомления</h2>
-                {notifications.length > 0 && <Button variant="secondary" className="text-xs" onClick={clearNotifications}>Очистить все</Button>}
+                <h2 className="text-lg font-semibold text-gray-800">{t('notificationsTitle')}</h2>
+                {notifications.length > 0 && <Button variant="secondary" className="text-xs" onClick={clearNotifications}>{t('clearAll')}</Button>}
             </div>
             <ul className="space-y-3">
                 {notifications.length > 0 ? notifications.map(n => (
@@ -29,7 +29,7 @@ const NotificationsSection = () => {
                             <p className="text-xs text-gray-400 mt-1">{n.time}</p>
                         </div>
                     </li>
-                )) : <p className="text-center text-gray-500 py-4">Новых уведомлений нет.</p>}
+                )) : <p className="text-center text-gray-500 py-4">{t('noNotifications')}</p>}
             </ul>
         </Card>
     );
