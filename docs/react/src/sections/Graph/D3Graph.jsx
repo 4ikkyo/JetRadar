@@ -199,7 +199,7 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
 
 
     return (
-        <div ref={containerRef} className="w-full h-96 bg-gray-100 rounded-lg border border-dashed border-gray-300 relative overflow-hidden">
+        <div ref={containerRef} className="w-full h-96 bg-gray-100 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 relative overflow-hidden">
         <svg ref={ref} className="w-full h-full"></svg>
         </div>
     );

@@ -9,12 +9,12 @@ const GraphTooltip = ({ tooltipContent, tooltipPosition, show }) => {
     return (
         <div
             id="graphTooltip"
-            className={`tooltip ${show ? 'visible' : ''}`}
+            className={`tooltip ${show ? 'visible' : ''} dark:bg-gray-800`}
             style={{ left: leftStyle, top: topStyle, transform: 'translateX(-50%)' }}
         >
-            {tooltipContent.name && <p className="font-bold">{tooltipContent.name}</p>}
-            {tooltipContent.balance && <p className="text-xs text-gray-300">{t('balanceLabel')} {tooltipContent.balance}</p>}
-            {tooltipContent.groups && <p className="text-xs text-gray-300">{t('groupsTooltipLabel')} {tooltipContent.groups.join(', ')}</p>}
+            {tooltipContent.name && <p className="font-bold text-white">{tooltipContent.name}</p>}
+            {tooltipContent.balance && <p className="text-xs text-gray-300 dark:text-gray-300">{t('balanceLabel')} {tooltipContent.balance}</p>}
+            {tooltipContent.groups && <p className="text-xs text-gray-300 dark:text-gray-300">{t('groupsTooltipLabel')} {tooltipContent.groups.join(', ')}</p>}
         </div>
     );
 };

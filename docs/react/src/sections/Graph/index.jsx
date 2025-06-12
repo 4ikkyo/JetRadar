@@ -127,7 +127,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
         <Card className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">{t('graphTitle')}</h2>
 
-            <div className="p-3 bg-gray-50 rounded-lg space-y-4">
+            <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-4">
                 <h3 className="text-md font-semibold text-gray-800">1. {t('walletSelection')}</h3>
                 <div className="flex justify-between items-center mb-3">
                     <Button variant="secondary" className="text-xs" onClick={handleSelectAll}>{t('selectAll')}</Button>
@@ -139,7 +139,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                 </div>
                 <div className="flex space-x-2 mb-4 text-sm overflow-x-auto pb-2">
                     {availableGroups.map(filter => (
-                        <button key={filter} onClick={() => setWalletSelectionFilter(filter)} className={cx('px-4 py-1.5 rounded-full flex-shrink-0 transition-colors', walletSelectionFilter === filter ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700')}>
+                        <button key={filter} onClick={() => setWalletSelectionFilter(filter)} className={cx('px-4 py-1.5 rounded-full flex-shrink-0 transition-colors', walletSelectionFilter === filter ? 'bg-indigo-600 text-white dark:bg-indigo-500' : 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-200')}>
                             {filter}
                         </button>
                     ))}
@@ -160,7 +160,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                 </div>
             </div>
 
-            <div className="p-3 bg-gray-50 rounded-lg space-y-2">
+            <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-2">
                 <h3 className="text-md font-semibold text-gray-800">2. {t('graphSettings')}</h3>
                 <Select value={depth} onChange={(e) => setDepth(Number(e.target.value))}>
                     <option value="1">{t('depth1')}</option>
@@ -168,9 +168,9 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                     <option value="3">{t('depth3')}</option>
                 </Select>
                 <div className="flex space-x-2 mt-3 text-sm">
-                    <button onClick={() => setGraphFilterType('all')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('allWallets')}</button>
-                    <button onClick={() => setGraphFilterType('TON')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'TON' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('onlyTon')}</button>
-                    <button onClick={() => setGraphFilterType('Jetton')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'Jetton' ? 'bg-indigo-600 text-white' : 'bg-gray-200')}>{t('onlyJetton')}</button>
+                    <button onClick={() => setGraphFilterType('all')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'all' ? 'bg-indigo-600 text-white dark:bg-indigo-500' : 'bg-gray-200 dark:bg-gray-800 dark:text-gray-200')}>{t('allWallets')}</button>
+                    <button onClick={() => setGraphFilterType('TON')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'TON' ? 'bg-indigo-600 text-white dark:bg-indigo-500' : 'bg-gray-200 dark:bg-gray-800 dark:text-gray-200')}>{t('onlyTon')}</button>
+                    <button onClick={() => setGraphFilterType('Jetton')} className={cx('px-3 py-1 rounded-full', graphFilterType === 'Jetton' ? 'bg-indigo-600 text-white dark:bg-indigo-500' : 'bg-gray-200 dark:bg-gray-800 dark:text-gray-200')}>{t('onlyJetton')}</button>
                 </div>
             </div>
 
@@ -178,7 +178,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                 {isLoading ? <>{Icons.spinner} <span>{t('dataLoading')}</span></> : t('buildGraph')}
             </Button>
 
-            <div className="bg-gray-50 p-3 rounded-lg text-sm">
+            <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-sm">
                 <h4 className="font-semibold mb-2">{t('legendTitle')}</h4>
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center">
@@ -201,7 +201,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                     setShowTooltip={setShowTooltip}
                 />
             ) : (
-                <div className="w-full h-96 bg-gray-100 rounded-lg border border-dashed border-gray-300 flex items-center justify-center">
+                <div className="w-full h-96 bg-gray-100 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
                     {isLoading ? <>{Icons.spinner} <span className="ml-2 text-gray-500">{t('dataLoading')}</span></> : <p className="text-gray-500 text-center p-4">{t('graphHint')}</p>}
                 </div>
             )}

@@ -87,6 +87,16 @@ export const translations = {
         walletAddedMessage: 'Кошелек успешно добавлен!',
         walletDeletedNotif: 'Кошелек "{name}" удален.',
         walletDeletedMessage: 'Кошелек удален.',
+        lightModeOn: 'Светлая тема',
+        darkModeOn: 'Темная тема',
+        walletsSelectedAll: 'Выбраны все кошельки',
+        walletsDeselectedAll: 'Выбор очищен',
+        walletSelected: 'Кошелек выбран',
+        walletDeselected: 'Кошелек снят',
+        filterApplied: 'Фильтр применен',
+        sortApplied: 'Сортировка применена',
+        depthUpdated: 'Глубина обновлена',
+        graphFilterApplied: 'Фильтр графа применен',
         justNow: 'только что'
     },
     en: {
@@ -177,6 +187,16 @@ export const translations = {
         walletAddedMessage: 'Wallet added successfully!',
         walletDeletedNotif: 'Wallet "{name}" deleted.',
         walletDeletedMessage: 'Wallet deleted.',
+        lightModeOn: 'Light mode on',
+        darkModeOn: 'Dark mode on',
+        walletsSelectedAll: 'All wallets selected',
+        walletsDeselectedAll: 'All wallets deselected',
+        walletSelected: 'Wallet selected',
+        walletDeselected: 'Wallet deselected',
+        filterApplied: 'Filter applied',
+        sortApplied: 'Sort applied',
+        depthUpdated: 'Depth updated',
+        graphFilterApplied: 'Graph filter applied',
         justNow: 'just now'
     },
     uk: {
@@ -267,8 +287,18 @@ export const translations = {
         walletAddedMessage: 'Гаманець успішно додано!',
         walletDeletedNotif: 'Гаманець "{name}" видалено.',
         walletDeletedMessage: 'Гаманець видалено.',
+        lightModeOn: 'Світла тема',
+        darkModeOn: 'Темна тема',
+        walletsSelectedAll: 'Вибрано всі гаманці',
+        walletsDeselectedAll: 'Вибір скасовано',
+        walletSelected: 'Гаманець обрано',
+        walletDeselected: 'Гаманець знято',
+        filterApplied: 'Фільтр застосовано',
+        sortApplied: 'Сортування застосовано',
+        depthUpdated: 'Глибину оновлено',
+        graphFilterApplied: 'Фільтр графа застосовано',
         justNow: 'щойно'
-    }
+   }
 };
 
 export const translate = (lang, key) => translations[lang]?.[key] || translations.en[key] || key;

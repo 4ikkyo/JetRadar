@@ -19,6 +19,10 @@ body {
     transition: opacity 0.15s;
     z-index: 2001;
 }
+.dark .tooltip {
+    background: #1f2937;
+    color: #f9fafb;
+}
 .tooltip.visible {
     opacity: 1;
 }
@@ -33,6 +37,9 @@ body {
     stroke-width: 1.5px;
     transition: stroke 0.2s, stroke-width 0.2s, stroke-opacity 0.2s;
 }
+.dark .graph-link {
+    stroke: #666;
+}
 .graph-link.highlighted-link {
     stroke: #4F46E5;
     stroke-width: 2.5px;
@@ -45,9 +52,15 @@ body {
 .graph-node.dimmed circle {
     fill: #ccc !important;
 }
+.dark .graph-node.dimmed circle {
+    fill: #555 !important;
+}
 .graph-link.dimmed {
     stroke: #eee;
     stroke-opacity: 0.3;
+}
+.dark .graph-link.dimmed {
+    stroke: #444;
 }
 .node-text {
     font-size: 10px;
@@ -55,6 +68,10 @@ body {
     text-anchor: middle;
     pointer-events: none;
     text-shadow: 0 0 3px white, 0 0 3px white;
+}
+.dark .node-text {
+    fill: #f3f4f6;
+    text-shadow: 0 0 3px black, 0 0 3px black;
 }
 @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes slide-up { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }

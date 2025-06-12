@@ -54,48 +54,64 @@ const AddWalletModal = () => {
         <Modal isOpen={isAddModalOpen} onClose={closeAddWalletModal} title={t('addWalletTitle')}>
             <div className="space-y-4">
                 <div>
-                    <label htmlFor="newWalletAddress" className="block text-sm font-medium text-gray-700 mb-1">Адрес</label>
-                    <input type="text" id="newWalletAddress" value={address} onChange={e => setAddress(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="EQC...ABC" />
+                    <label htmlFor="newWalletAddress" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Адрес</label>
+                    <input
+                        type="text"
+                        id="newWalletAddress"
+                        value={address}
+                        onChange={e => setAddress(e.target.value)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+                        placeholder="EQC...ABC"
+                    />
                 </div>
                 <div>
-                    <label htmlFor="newWalletAlias" className="block text-sm font-medium text-gray-700 mb-1">{t('aliasLabel')}</label>
-                    <input type="text" id="newWalletAlias" value={alias} onChange={e => setAlias(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder={t('aliasPlaceholder')} />
+                    <label htmlFor="newWalletAlias" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">{t('aliasLabel')}</label>
+                    <input
+                        type="text"
+                        id="newWalletAlias"
+                        value={alias}
+                        onChange={e => setAlias(e.target.value)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+                        placeholder={t('aliasPlaceholder')}
+                    />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('groupsLabel')}</label>
-                    <div className="flex flex-wrap gap-2 mb-2 p-2 bg-gray-50 rounded-md min-h-[40px]">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">{t('groupsLabel')}</label>
+                    <div className="flex flex-wrap gap-2 mb-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-md min-h-[40px]">
                         {selectedGroups.length > 0 ? selectedGroups.map(group => (
                             <span key={group} className="bg-indigo-600 text-white text-xs font-medium px-2.5 py-1 rounded-full flex items-center">
                                 {group}
                                 <button onClick={() => toggleGroup(group)} className="ml-1.5 text-indigo-200 hover:text-white">✕</button>
                             </span>
-                        )) : <p className="text-sm text-gray-400">{t('groupHint')}</p>}
+                        )) : <p className="text-sm text-gray-400 dark:text-gray-500">{t('groupHint')}</p>}
                     </div>
-                    
+
                     <div className="flex">
                         <input
                             type="text"
                             value={groupInput}
                             onChange={e => setGroupInput(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            className="w-full p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                             placeholder={t('createGroupPlaceholder')}
                         />
                         <button onClick={handleAddGroup} className="bg-indigo-500 text-white px-3 rounded-r-md hover:bg-indigo-600">
                             ↵
                         </button>
                     </div>
-                
+
                     {existingGroups.length > 0 && <div className="mt-2">
-                        <p className="text-xs text-gray-500 mb-1">{t('existingGroups')}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('existingGroups')}</p>
                         <div className="flex flex-wrap gap-1">
                             {existingGroups.map(group => (
-                                <button 
-                                    key={group} 
+                                <button
+                                    key={group}
                                     onClick={() => toggleGroup(group)}
                                     className={cx(
                                         "px-2 py-0.5 rounded-full text-xs transition-colors",
-                                        selectedGroups.includes(group) ? 'bg-indigo-200 text-indigo-800' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        selectedGroups.includes(group)
+                                            ? 'bg-indigo-200 dark:bg-indigo-700 text-indigo-800 dark:text-white'
+                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                                     )}
                                 >
                                     {group}
