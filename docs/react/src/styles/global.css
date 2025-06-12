@@ -40,15 +40,17 @@ body {
 .dark .graph-link {
     stroke: #666;
 }
+/* Стили для подсветки активного узла */
 .graph-link.highlighted-link {
-    stroke: #4F46E5;
+    stroke: #10B981; /* Более выразительный зеленый цвет */
     stroke-width: 2.5px;
     stroke-opacity: 1;
 }
 .graph-node.highlighted-node circle {
-    stroke: #4F46E5;
+    stroke: #3B82F6; /* Синий цвет */
     stroke-width: 3px;
 }
+/* Стили для приглушенных (неактивных) элементов */
 .graph-node.dimmed circle {
     fill: #ccc !important;
 }
@@ -67,12 +69,33 @@ body {
     fill: #333;
     text-anchor: middle;
     pointer-events: none;
-    text-shadow: 0 0 3px white, 0 0 3px white;
+    /* Тень для лучшей читаемости на разных фонах */
+    text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
 }
 .dark .node-text {
     fill: #f3f4f6;
-    text-shadow: 0 0 3px black, 0 0 3px black;
+    text-shadow: 0 0 3px black, 0 0 3px black, 0 0 3px black;
 }
+/* Добавим тени для текста узлов для лучшей читаемости */
+.graph-node.highlighted-node text {
+    font-weight: bold;
+    fill: #3B82F6 !important; /* Цвет текста, соответствующий выделенному узлу */
+}
+.link-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px; /* Чуть меньше размер для меток связей */
+    fill: #555;
+    pointer-events: none;
+    text-anchor: middle;
+    /* Тень для лучшей читаемости */
+    text-shadow: 0 0 2px white, 0 0 2px white;
+}
+.dark .link-text {
+    fill: #ccc;
+    text-shadow: 0 0 2px black, 0 0 2px black;
+}
+
+
 @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes slide-up { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 @keyframes fade-out { 0% { opacity: 1; } 100% { opacity: 0; } }
@@ -82,3 +105,4 @@ body {
 .animate-fade-out { animation: fade-out 0.3s ease-in forwards; }
 .animate-slide-out { animation: slide-out 0.3s ease-in forwards; }
 .animate-fade-in-out { animation: fade-in 0.3s ease-out, fade-out 0.3s ease-in 2.2s forwards; }
+
