@@ -39,13 +39,12 @@ const AddWalletModal = () => {
         setAlias('');
         setSelectedGroups([]);
         setGroupInput('');
-    }
+    };
 
     const handleSubmit = () => {
         if (!address.trim()) {
-            showMessage(t(addressEmpty));
+            showMessage(t('addressEmpty'));
             return;
-        }
         }
         addWallet({ address, name: alias || t('noLabel'), groups: selectedGroups });
         resetForm();
