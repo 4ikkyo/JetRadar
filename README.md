@@ -10,7 +10,12 @@
    – Uses the FastAPI backend for all data operations.
 
 3. **React Frontend (`docs/`)**
-   – A mini app for Telegram built with React.
+   – A mini app for Telegram built with React **(On develop)**
+
+---
+## Tasks
+
+- Connect the React frontend with the Python FastAPI backend.
 
 ---
 
@@ -82,7 +87,7 @@ The compiled site will be placed in `docs/dist`.
 
 ---
 
-## ⚙Environment Variables
+## Environment Variables
 
 The following environment variables must be set in your `.env` file:
 

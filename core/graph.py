@@ -1,8 +1,6 @@
 # core/graph.py
 
 """
-У цьому модулі можна розташувати допоміжну логіку для побудови
-графа транзакцій: із списку транзакцій (JSON з TonAPI) –> граф у вигляді dict:
 {
   "nodes": [ {"id":<address>, "label":<alias_or_address>, "meta":{…}}, … ],
   "edges": [ {"from":<src>, "to":<dst>, "value":<кількість транзакцій>,
@@ -16,11 +14,9 @@ from datetime import datetime
 
 def build_transaction_graph(tx_list: list[dict], alias_map: dict[str, str] = None):
     """
-    Приймає `tx_list` – список JSON-транзакцій від TonAPI.
-    Повертає просту структуру { nodes: [...], edges: [...] }.
+    Приймає `tx_list` список JSON-транзакцій від TonAPI.
 
-    alias_map: словник { address: alias }, використовується, щоб підставити
-    людський псевдонім (alias) для вузла, якщо він є у ваших UserWallet.alias.
+    alias_map: словник { address: alias }, використовується, щоб підставити людський псевдонім (alias)
     """
 
     if alias_map is None:
@@ -73,7 +69,7 @@ def build_transaction_graph(tx_list: list[dict], alias_map: dict[str, str] = Non
                     nodes[src] = {"id": src, "label": alias_map.get(src, src)}
                     nodes[dst] = {"id": dst, "label": alias_map.get(dst, dst)}
 
-    # Тепер перетворимо edges_temp у список
+    # Перетворимо edges_temp у список
     edges = []
     for (src, dst), info in edges_temp.items():
         edges.append(
