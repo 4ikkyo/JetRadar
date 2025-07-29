@@ -1,13 +1,16 @@
 # JetRadar
 
-**JetRadar** is a Telegram bot and FastAPI service for monitoring activity of TON wallets. It consists of two main parts:
+**JetRadar** is a Telegram bot, FastAPI service, and React web app for monitoring activity of TON wallets. It consists of three main parts:
 
-1. **FastAPI Service (`api/`)**  
+1. **FastAPI Service (`api/`)**
    – Provides endpoints to fetch transaction history via TonAPI and generate wallet connection graphs.
 
-2. **Telegram Bot (`bot/`)**  
-   – Supports commands like `/start`, `/add`, `/list`, `/tx`.  
+2. **Telegram Bot (`bot/`)**
+   – Supports commands like `/start`, `/add`, `/list`, `/tx`.
    – Uses the FastAPI backend for all data operations.
+
+3. **React Frontend (`docs/`)**
+   – A mini app for Telegram built with React.
 
 ---
 
@@ -56,10 +59,10 @@ python bot/main.py
 
 ## Frontend
 
-Install Node.js dependencies and run the React frontend located in `docs/react`:
+Install Node.js dependencies and run the React frontend located in `docs`:
 
 ```bash
-cd docs/react
+cd docs
 npm install
 ```
 
@@ -75,7 +78,7 @@ Or build the production bundle:
 npm run build
 ```
 
-The compiled site will be placed in `docs/react/dist`.
+The compiled site will be placed in `docs/dist`.
 
 ---
 
