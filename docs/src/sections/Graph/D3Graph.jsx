@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import { debounce } from 'lodash'; // Убедитесь, что lodash установлен: npm install lodash
+import PropTypes from 'prop-types'; // Добавляем PropTypes
 
 // --- ADVANCED GRAPH SECTION ---
 // Этот компонент рендерит силовую диаграмму с использованием D3.js, оптимизированную для связей кошельков.
@@ -30,19 +31,35 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
     const showNodeTooltip = useCallback((event, d) => {
         // Убедитесь, что установщики состояния тултипа предоставлены перед вызовом
         if (setTooltipContent) setTooltipContent(d);
-        if (setTooltipPosition) {
-            // Используем clientX/Y для позиционирования тултипа относительно окна браузера,
-            // а не относительно SVG, чтобы он всегда был видим.
+        if (setTooltipPosition && containerRef.current && svgRef.current && currentTransform) {
+            // Получаем ограничивающий прямоугольник SVG для расчета смещения
+            const svgRect = svgRef.current.getBoundingClientRect();
+            // Получаем ограничивающий прямоугольник контейнера для расчета смещения
+            const containerRect = containerRef.current.getBoundingClientRect();
+
+            // Применяем текущее D3 преобразование к D3 координатам узла
+            // и затем добавляем смещение относительно контейнера графа
+            const transformedX = currentTransform.applyX(d.x) + svgRect.left - containerRect.left;
+            const transformedY = currentTransform.applyY(d.y) + svgRect.top - containerRect.top;
+
+            // Позиционируем тултип относительно преобразованной позиции узла на экране
             setTooltipPosition({
-                left: `${event.clientX}px`,
-                top: `${event.clientY + 20}px` // Смещение тултипа немного ниже курсора
+                left: `${transformedX + 10}px`, // Смещение от узла
+                top: `${transformedY + 10}px`
             });
         }
         if (setShowTooltip) setShowTooltip(true);
-    }, [setTooltipContent, setTooltipPosition, setShowTooltip]);
+    }, [setTooltipContent, setTooltipPosition, setShowTooltip, currentTransform, svgRef, containerRef]);
+
 
     // Основной хук эффекта D3
     useEffect(() => {
+        // Добавлена проверка на null для svgRef.current
+        if (!svgRef.current) {
+            console.warn("SVG ref is null. Cannot initialize D3 graph.");
+            return;
+        }
+
         // Очистите SVG и вернитесь, если нет данных графа
         if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
             d3.select(svgRef.current).selectAll("*").remove();
@@ -170,7 +187,7 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
         svgElement.call(zoom);
 
         // Поведение перетаскивания для узлов
-        const dragBehavior = useCallback(d3.drag()
+        const dragBehavior = d3.drag()
             .on("start", (event, d) => {
                 if (!event.active) simulation.alphaTarget(0.3).restart();
                 d.fx = d.x; // Фиксировать положение узла во время перетаскивания
@@ -186,7 +203,7 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
                 // При желании можно открепить узлы после перетаскивания, иначе они останутся фиксированными
                 d.fx = null; // Отпустить узел после перетаскивания
                 d.fy = null;
-            }), [simulation, setShowTooltip]); // Зависимости для useCallback
+            });
 
         node.call(dragBehavior);
 
@@ -285,12 +302,13 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
 
             // Применить подсветку/затемнение на основе activeNode
             node.classed("highlighted-node", d => d.id === activeNode);
-            link.classed("highlighted-link", l => l.source.id === activeNode || l.target.id === activeNode);
+            // Добавлена проверка на существование l.source и l.target
+            link.classed("highlighted-link", l => (l.source && l.source.id === activeNode) || (l.target && l.target.id === activeNode));
 
             // Затемнить неактивные узлы и связи
             if (activeNode) {
                 node.classed("dimmed", d => d.id !== activeNode && !isConnected(d.id, activeNode, linksWithNodeObjects));
-                link.classed("dimmed", l => l.source.id !== activeNode && l.target.id !== activeNode);
+                link.classed("dimmed", l => (l.source && l.source.id !== activeNode) && (l.target && l.target.id !== activeNode));
             } else {
                 node.classed("dimmed", false);
                 link.classed("dimmed", false);
@@ -314,7 +332,7 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
         };
     }, [
         graphData, activeNode, setShowTooltip, setTooltipContent, setTooltipPosition,
-        isConnected, showNodeTooltip, searchTerm, tokenFilter, width, height // Добавьте width, height в зависимости, если они могут динамически изменяться
+        isConnected, showNodeTooltip, searchTerm, tokenFilter, currentTransform // currentTransform добавлен в зависимости
     ]);
 
     // Рендеринг контейнера графа
@@ -329,6 +347,20 @@ const D3Graph = ({ graphData, onNodeClick, setTooltipContent, setTooltipPosition
             */}
         </div>
     );
+};
+
+// Определение PropTypes для D3Graph
+D3Graph.propTypes = {
+    graphData: PropTypes.shape({
+        nodes: PropTypes.array.isRequired,
+        links: PropTypes.array.isRequired,
+    }),
+    onNodeClick: PropTypes.func.isRequired,
+    setTooltipContent: PropTypes.func.isRequired,
+    setTooltipPosition: PropTypes.func.isRequired,
+    setShowTooltip: PropTypes.func.isRequired,
+    searchTerm: PropTypes.string,
+    tokenFilter: PropTypes.string,
 };
 
 export default D3Graph;

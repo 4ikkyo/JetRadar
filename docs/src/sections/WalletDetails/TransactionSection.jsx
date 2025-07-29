@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 import Card from '../../components/ui/Card';
-import { Icons } from '../../lib/icons';
+import { Icons, Icon } from '../../lib/icons';
 import { cx } from '../../lib/classNameHelper';
 
 const TransactionSection = () => {
@@ -68,7 +68,7 @@ const TransactionSection = () => {
                         </div>
                         {(explanation?.hash === tx.hash && explanation.text) && (
                             <div className="text-indigo-800 text-xs bg-indigo-100 p-2 rounded-md border border-indigo-200">
-                                {explanationLoading ? (<div className="text-center text-gray-500 flex items-center justify-center space-x-1"><Icons.spinner className="w-3 h-3"/> <span>{t('loading')}</span></div>) : explanation.text}
+                                {explanationLoading ? (<div className="text-center text-gray-500 flex items-center justify-center space-x-1"><Icon icon={Icons.spinner} className="w-3 h-3"/> <span>{t('loading')}</span></div>) : explanation.text}
                                 {explanationError && <div className="text-red-600">{explanationError}</div>}
                             </div>
                         )}

@@ -1,6 +1,6 @@
 # JetRadar React Frontend
 
-This directory contains the React interface for **JetRadar**. It is built with [Vite](https://vitejs.dev/) and Tailwind CSS.
+This directory contains the React interface for **JetRadar**. It is built with Vite and Tailwind CSS.
 
 ## Prerequisites
 - Node.js **18** or newer

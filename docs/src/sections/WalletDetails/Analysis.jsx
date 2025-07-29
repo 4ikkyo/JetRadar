@@ -4,18 +4,18 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { Icons } from '../../lib/icons';
 
-const AIAnalysis = () => {
+const Analysis = () => {
     const { t } = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
     const [analysis, setAnalysis] = useState('');
     const [error, setError] = useState('');
 
-    const getAIResponse = async (type) => {
+    const getAnalysis = async (type) => {
         setIsLoading(true);
         setAnalysis('');
         setError('');
 
-        // Здесь могла бы быть логика запроса к AI
+        // Placeholder for analysis request logic
 
         try {
             await new Promise(resolve => setTimeout(resolve, 1500));
@@ -26,7 +26,7 @@ const AIAnalysis = () => {
                 setAnalysis(t('profileAssessment'));
             }
         } catch (err) {
-            setError(`${t('error')}: ${err.message || t('aiResponseFailed')}`);
+            setError(`${t('error')}: ${err.message || t('analysisFailed')}`);
         } finally {
             setIsLoading(false);
         }
@@ -34,10 +34,10 @@ const AIAnalysis = () => {
 
     return (
         <Card className="bg-gray-50">
-            <h3 className="text-md font-semibold text-gray-800 mb-3">{t('aiAnalysisTitle')}</h3>
+            <h3 className="text-md font-semibold text-gray-800 mb-3">{t('analysisTitle')}</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-                <Button variant="secondary" onClick={() => getAIResponse('profile')}>{t('determineProfile')}</Button>
-                <Button variant="secondary" className="bg-red-50 text-red-700 hover:bg-red-100" onClick={() => getAIResponse('risk')}>{t('assessRisk')}</Button>
+                <Button variant="secondary" onClick={() => getAnalysis('profile')}>{t('determineProfile')}</Button>
+                <Button variant="secondary" className="bg-red-50 text-red-700 hover:bg-red-100" onClick={() => getAnalysis('risk')}>{t('assessRisk')}</Button>
             </div>
             {isLoading && <div className="text-center text-gray-500 pt-3 flex items-center justify-center space-x-2">{Icons.spinner} <span>{t('analyzing')}</span></div>}
             {analysis && <div className="text-gray-700 text-sm leading-relaxed mt-3 p-2 bg-indigo-50 rounded-lg">{analysis}</div>}
@@ -46,4 +46,4 @@ const AIAnalysis = () => {
     );
 };
 
-export default AIAnalysis;
+export default Analysis;

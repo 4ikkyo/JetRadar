@@ -11,7 +11,7 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -79,7 +79,7 @@ The compiled site will be placed in `docs/react/dist`.
 
 ---
 
-## ⚙️ Environment Variables
+## ⚙Environment Variables
 
 The following environment variables must be set in your `.env` file:
 
@@ -89,7 +89,7 @@ The following environment variables must be set in your `.env` file:
 
 ---
 
-## 🧪 Testing
+## Testing
 
 Install the project requirements and `pytest`:
 
@@ -108,6 +108,6 @@ The tests run with the default settings, so no environment variables are require
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.

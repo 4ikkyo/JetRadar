@@ -4,7 +4,7 @@ import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import { Icons } from "../../lib/icons";
 import WalletInfo from "./WalletInfo";
-import AIAnalysis from "./AIAnalysis";
+import Analysis from "./Analysis";
 import TransactionSection from "./TransactionSection";
 
 
@@ -28,7 +28,7 @@ const WalletDetails = () => {
                 </button>
                 <WalletInfo />
             </Card>
-            <AIAnalysis />
+            <Analysis />
             <TransactionSection />
         </div>
     );

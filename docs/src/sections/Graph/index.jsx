@@ -1,11 +1,12 @@
-import { useState, useContext, useCallback, useEffect } from 'react'; // Добавлен useEffect
+import { useState, useContext, useCallback, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Select from '../../components/ui/Select';
 import D3Graph from './D3Graph';
-import { Icons } from '../../lib/icons';
+import { Icons, Icon } from '../../lib/icons';
 import { cx } from '../../lib/classNameHelper';
+import PropTypes from 'prop-types'; // Добавляем PropTypes
 
 const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip }) => {
     const { wallets, transactions, selectWallet, showMessage, t } = useContext(AppContext);
@@ -28,6 +29,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
     const [searchTerm, setSearchTerm] = useState('');
     const [tokenFilter, setTokenFilter] = useState(''); // '' для всех, 'TON', 'Jetton', 'ETH' и т.д.
 
+    // availableGroups включает 'Все', 'TON', 'Jetton' и группы из кошельков
     const availableGroups = [filterAllLabel, 'TON', 'Jetton', ...new Set(wallets.flatMap(w => w.groups).filter(Boolean))].filter(Boolean);
 
     // Функция для получения отфильтрованных и отсортированных кошельков для отображения в списке выбора
@@ -203,7 +205,7 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
             </div>
 
             <Button onClick={buildGraph} className="w-full" disabled={isLoading || selectedWalletIds.length === 0}>
-                {isLoading ? <><Icons.spinner className="animate-spin mr-2" /> <span>{t('dataLoading')}</span></> : t('buildGraph')}
+                {isLoading ? <><Icon icon={Icons.spinner} className="animate-spin mr-2" /> <span>{t('dataLoading')}</span></> : t('buildGraph')}
             </Button>
 
             {/* Добавлены поля поиска и фильтрации для D3Graph */}
@@ -272,11 +274,18 @@ const GraphSection = ({ setTooltipContent, setTooltipPosition, setShowTooltip })
                 />
             ) : (
                 <div className="w-full h-96 bg-gray-100 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
-                    {isLoading ? <><Icons.spinner className="animate-spin" /> <span className="ml-2 text-gray-500">{t('dataLoading')}</span></> : <p className="text-gray-500 text-center p-4">{t('graphHint')}</p>}
+                    {isLoading ? <><Icon icon={Icons.spinner} className="animate-spin" /> <span className="ml-2 text-gray-500">{t('dataLoading')}</span></> : <p className="text-gray-500 text-center p-4">{t('graphHint')}</p>}
                 </div>
             )}
         </Card>
     );
+};
+
+// Определение PropTypes для GraphSection
+GraphSection.propTypes = {
+    setTooltipContent: PropTypes.func.isRequired,
+    setTooltipPosition: PropTypes.func.isRequired,
+    setShowTooltip: PropTypes.func.isRequired,
 };
 
 export default GraphSection;
