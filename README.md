@@ -12,12 +12,10 @@
 3. **React Frontend (`docs/`)**
    – A mini app for Telegram built with React **(On develop)**
 
----
 ## Tasks
 
 - Connect the React frontend with the Python FastAPI backend.
 
----
 
 ## Getting Started
 
