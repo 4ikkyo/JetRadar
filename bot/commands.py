@@ -9,20 +9,15 @@ import logging
 from config import BACKEND_URL as API_BASE_URL
 
 bot_logger = logging.getLogger(__name__)  # Логгер для команд бота
-logging.basicConfig(level=logging.INFO)  # Убедитесь, что логирование настроено
-
-# API_BASE_URL определяется в config.py и указывает на адрес запущенного FastAPI сервера
+logging.basicConfig(level=logging.INFO)
 
 router = Router()
 
 
-@router.message(Command("start"))  # Более явное использование Command фильтра
+@router.message(Command("start"))
 async def start_command(message: Message):
-    # При старте можно также зарегистрировать/проверить пользователя через API,
-    # но команда /add уже будет это делать.
-    # Пока оставим просто приветствие.
     await message.answer(
-        "👋 Привіт! Це JetRadar — система моніторингу гаманців TON.\n"
+        "Привіт! Це JetRadar — система моніторингу гаманців TON.\n"
         "Щоб додати гаманець у Watchlist, напиши:\n"
         "<code>/add АДРЕСА_ГАМАНЦЯ [Метка кошелька]</code>\n"
         "Або скористайся нашим веб-додатком для зручного управління!",
@@ -48,7 +43,7 @@ async def add_wallet_via_api(message: Message):
         return
 
     user_id = message.from_user.id
-    # Получаем имя пользователя для передачи в API (на случай, если пользователь новый для API)
+    # Получаем имя пользователя для передачи в API
     username = (
         message.from_user.username or f"{message.from_user.first_name} {message.from_user.last_name or ''}".strip()
     )
@@ -253,7 +248,6 @@ async def tx_history_via_api(message: types.Message):
         text_blocks.append("\n".join(event_lines))
 
     full_message = "\n".join(text_blocks)
-    # Telegram имеет ограничение на длину сообщения
     if len(full_message) > 4096:
         full_message = full_message[:4090] + "\n[...]"
     await message.answer(full_message, parse_mode="HTML", disable_web_page_preview=True)
@@ -375,15 +369,9 @@ async def export_history_command(message: Message):
         return
     address = args[1].strip()
 
-    # Можно добавить выбор формата через аргумент команды или Inline-кнопки
-    # Пока просто JSON или ссылка на CSV
     export_format = "csv"  # или "json"
 
     api_url = f"{API_BASE_URL}/wallet/{address}/history/export?format={export_format}"
-    # Для бота может быть лучше, если API вернет JSON с данными,
-    # а бот сам сформирует файл и отправит, либо отправит ссылку на скачивание,
-    # если API может отдавать файл напрямую (что и делает Response с Content-Disposition)
-
     await message.answer(
         f"Готую експорт історії для <code>{address}</code> у форматі {export_format}...\n"
         f"Ви можете завантажити його за прямим посиланням (якщо API налаштовано для цього):\n"
@@ -397,7 +385,6 @@ async def export_history_command(message: Message):
 @router.message(Command("graph"))
 async def show_graph_command(message: Message):
     # Команда /graph [адрес] [глубина]
-    # Для простоты, пока просто ссылка на WebApp с параметрами для графа
     args = message.text.split()
     target_address = args[1] if len(args) > 1 else None
     # depth = args[2] if len(args) > 2 and args[2].isdigit() else 1 # пока не используем
@@ -421,13 +408,10 @@ async def show_graph_command(message: Message):
 
 @router.message(Command("webapp"))
 async def send_webapp_button(message: Message):
-    # Убедитесь, что URL вашего WebApp правильный и доступен
-    # Для локальной разработки с GitHub Pages может потребоваться ngrok или аналогичный туннель,
-    # если Telegram требует HTTPS для WebApp, а GitHub Pages его предоставляет.
-    web_app_url = "https://4ikkyo.github.io/JetRadar/"  # Ваш URL
+    web_app_url = "https://4ikkyo.github.io/JetRadar/"
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🚀 Відкрити JetRadar WebApp", web_app=WebAppInfo(url=web_app_url))]
+            [InlineKeyboardButton(text="Відкрити JetRadar WebApp", web_app=WebAppInfo(url=web_app_url))]
         ]
     )
     await message.answer("Натисни кнопку нижче, щоб відкрити інтерактивну версію JetRadar:", reply_markup=keyboard)

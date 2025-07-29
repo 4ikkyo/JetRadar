@@ -63,7 +63,7 @@ class Transaction(Base):  # Новая таблица для локальног�
     id = Column(Integer, primary_key=True, index=True)
     wallet_id = Column(
         Integer, ForeignKey("wallets.id"), nullable=False, index=True
-    )  # К какому из НАШИХ отслеживаемых кошельков относится
+    )
     event_id = Column(String, unique=True, nullable=False, index=True)  # Уникальный ID события из TonAPI
     lt = Column(String, nullable=False)  # Логическое время транзакции (важно для сортировки и уникальности)
     timestamp = Column(Integer, nullable=False, index=True)  # UNIX timestamp
@@ -85,7 +85,7 @@ class Transaction(Base):  # Новая таблица для локальног�
     )
 
 
-# Таблица для настроек уведомлений (если нужно будет более гранулировано)
+# Таблица для настроек уведомлений
 # class NotificationSetting(Base):
 #     __tablename__ = 'notification_settings'
 #     id = Column(Integer, primary_key=True)

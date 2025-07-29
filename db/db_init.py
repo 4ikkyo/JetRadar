@@ -8,12 +8,10 @@ from .models import Base  # Используем относительный им
 
 logger = logging.getLogger(__name__)
 
-# Определяем путь к корневому каталогу проекта
-# Это предполагает, что db_init.py находится в подкаталоге 'db' корневого каталога проекта
 PROJECT_ROOT = Path(__file__).parent.parent
 ENV_PATH = PROJECT_ROOT / '.env'
 
-# Загружаем переменные окружения из .env файла
+# Переменные окружения из .env файла
 if ENV_PATH.exists():
     load_dotenv(dotenv_path=ENV_PATH)
     logger.info(f"Загружены переменные окружения из {ENV_PATH}")
@@ -23,8 +21,6 @@ else:
     )
 
 # Получаем DATABASE_URL из переменных окружения
-# Предоставляем значение по умолчанию, если переменная не установлена,
-# и создаем директорию 'data', если она не существует.
 DEFAULT_DB_PATH = PROJECT_ROOT / "data" / "data.db"
 if not DEFAULT_DB_PATH.parent.exists():
     DEFAULT_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -36,7 +32,7 @@ DATABASE_URL = os.getenv(
 logger.info(f"Используется DATABASE_URL: {DATABASE_URL}")
 
 
-# echo=True полезно для отладки SQL-запросов, можно установить в False для продакшена
+# echo=True для отладки SQL-запросов
 engine = create_async_engine(DATABASE_URL, echo=False)
 async_session = sessionmaker(
     engine, expire_on_commit=False, class_=AsyncSession

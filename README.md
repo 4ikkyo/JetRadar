@@ -1,17 +1,25 @@
 # JetRadar
 
-**JetRadar** is a Telegram bot and FastAPI service for monitoring activity of TON wallets. It consists of two main parts:
+**JetRadar** is a Telegram bot, FastAPI service, and React web app for monitoring activity of TON wallets. It consists of three main parts:
 
-1. **FastAPI Service (`api/`)**  
+1. **FastAPI Service (`api/`)**
    – Provides endpoints to fetch transaction history via TonAPI and generate wallet connection graphs.
 
-2. **Telegram Bot (`bot/`)**  
-   – Supports commands like `/start`, `/add`, `/list`, `/tx`.  
+2. **Telegram Bot (`bot/`)**
+   – Supports commands like `/start`, `/add`, `/list`, `/tx`.
    – Uses the FastAPI backend for all data operations.
+
+3. **React Frontend (`docs/`)**
+   – A mini app for Telegram built with React **(On develop)**
+
+---
+## Tasks
+
+- Connect the React frontend with the Python FastAPI backend.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -54,9 +62,32 @@ uvicorn api.main:app --reload
 python bot/main.py
 ```
 
+## Frontend
+
+Install Node.js dependencies and run the React frontend located in `docs`:
+
+```bash
+cd docs
+npm install
+```
+
+Start the development server with:
+
+```bash
+npm run dev
+```
+
+Or build the production bundle:
+
+```bash
+npm run build
+```
+
+The compiled site will be placed in `docs/dist`.
+
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 The following environment variables must be set in your `.env` file:
 
@@ -66,7 +97,7 @@ The following environment variables must be set in your `.env` file:
 
 ---
 
-## 🧪 Testing
+## Testing
 
 Install the project requirements and `pytest`:
 
@@ -85,6 +116,6 @@ The tests run with the default settings, so no environment variables are require
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
